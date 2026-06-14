@@ -1,0 +1,81 @@
+/* 密度切換：桌面板（Tauri）用 compact 高資訊密度；網頁版 comfortable 維持原樣。
+   只覆寫間距/字級/控制元件高度，不動顏色與視覺效果。 */
+:root {
+  --density-space-1: 6px;
+  --density-space-2: 12px;
+  --density-space-3: 18px;
+  --density-control-h: 34px;
+  --density-fs-base: 15px;
+  --density-fs-small: 13px;
+  --density-fs-title: 18px;
+}
+
+:root[data-density='compact'] {
+  --density-space-1: 3px;
+  --density-space-2: 7px;
+  --density-space-3: 10px;
+  --density-control-h: 26px;
+  --density-fs-base: 13px;
+  --density-fs-small: 11.5px;
+  --density-fs-title: 15px;
+}
+
+/* compact 模式整體縮放：以既有版面為基準做緊湊化覆寫 */
+:root[data-density='compact'] body {
+  font-size: var(--density-fs-base);
+}
+
+:root[data-density='compact'] .container {
+  padding: var(--density-space-2);
+  gap: var(--density-space-2);
+}
+
+:root[data-density='compact'] .section {
+  padding: var(--density-space-2) var(--density-space-3);
+  margin-bottom: var(--density-space-2);
+}
+
+:root[data-density='compact'] .section-title {
+  font-size: var(--density-fs-title);
+}
+
+:root[data-density='compact'] .st-cell input,
+:root[data-density='compact'] .st-cell select,
+:root[data-density='compact'] .input-group input,
+:root[data-density='compact'] .input-group select {
+  min-height: var(--density-control-h);
+  padding-top: 2px;
+  padding-bottom: 2px;
+  font-size: var(--density-fs-base);
+}
+
+:root[data-density='compact'] .st-row {
+  gap: var(--density-space-1);
+}
+
+:root[data-density='compact'] .stat-table {
+  gap: var(--density-space-1);
+}
+
+:root[data-density='compact'] .st-cell-label,
+:root[data-density='compact'] .st-colhead,
+:root[data-density='compact'] .input-group label {
+  font-size: var(--density-fs-small);
+}
+
+:root[data-density='compact'] .header-wrap {
+  padding-top: var(--density-space-1);
+  padding-bottom: var(--density-space-1);
+}
+
+:root[data-density='compact'] .header-title {
+  font-size: 20px;
+}
+
+:root[data-density='compact'] .buff-grid {
+  gap: var(--density-space-1);
+}
+
+:root[data-density='compact'] .combat-power-summary {
+  padding: var(--density-space-2);
+}

@@ -1,0 +1,535 @@
+/* Theme: current web-edition pastel glass skin. */
+
+/* ===== Web edition inspired pastel-glass theme ===== */
+:root {
+  --web-glass: rgba(91, 96, 132, 0.6);
+  --web-glass-strong: rgba(76, 82, 121, 0.64);
+  --web-glass-soft: rgba(132, 137, 171, 0.36);
+  --web-line: rgba(220, 232, 255, 0.22);
+  --web-line-strong: rgba(224, 236, 255, 0.34);
+  --web-text: #f3f8ff;
+  --web-muted: #d5deec;
+  --web-blue: #7fb7ec;
+  --web-blue-strong: #64a6e3;
+  --web-cyan: #8fe2ff;
+  --web-violet: #d4b8ff;
+  --web-gold: #ffe688;
+  --web-shadow: 0 24px 70px rgba(57, 55, 91, 0.28);
+  --page-max-width: 1480px;
+  --calc-side-max-width: 540px;
+  --bg-color: #8392bd;
+  --card-bg: var(--web-glass);
+  --section-bg: var(--web-glass);
+  --text-color: var(--web-text);
+  --muted-color: var(--web-muted);
+  --accent-color: var(--web-blue);
+  --accent-strong: var(--web-blue-strong);
+  --accent-soft: rgba(127, 183, 236, 0.22);
+  --violet-color: var(--web-violet);
+  --accent-violet: rgba(212, 184, 255, 0.82);
+  --warm-color: var(--web-gold);
+  --warm-soft: rgba(255, 230, 136, 0.16);
+  --input-bg: rgba(66, 72, 109, 0.56);
+  --border-color: var(--web-line);
+  --result-color: var(--web-cyan);
+  --header-bg: rgba(83, 89, 130, 0.36);
+  --disabled-bg: rgba(96, 101, 135, 0.44);
+  --glass-shadow: var(--web-shadow);
+}
+
+html {
+  background: #8c98bd;
+}
+
+body {
+  background-color: #8c98bd;
+  background-image:
+    linear-gradient(180deg, rgba(100, 112, 157, 0.22), rgba(94, 82, 116, 0.42)),
+    radial-gradient(circle at 76% 18%, rgba(255, 150, 175, 0.22), transparent 28%),
+    radial-gradient(circle at 12% 19%, rgba(255, 178, 193, 0.22), transparent 28%),
+    url('../assets/images/maple-sky-village-bg.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  background-blend-mode: multiply, screen, screen, normal;
+  color: var(--web-text);
+}
+
+.header-title {
+  color: #ffffff;
+  background: none;
+  -webkit-background-clip: initial;
+  -webkit-text-fill-color: currentColor;
+  filter: none;
+  text-shadow:
+    0 2px 4px rgba(44, 42, 78, 0.38),
+    0 0 14px rgba(255, 255, 255, 0.22);
+}
+
+.header-subtitle {
+  color: rgba(255, 255, 255, 0.96);
+  text-shadow: 0 2px 4px rgba(44, 42, 78, 0.36);
+}
+
+.sticky-header {
+  background: linear-gradient(180deg, rgba(86, 91, 132, 0.08), transparent);
+}
+
+.container {
+  background:
+    linear-gradient(180deg, rgba(229, 238, 255, 0.13), rgba(105, 99, 134, 0.22)),
+    rgba(122, 122, 159, 0.32);
+  border: 1px solid rgba(230, 238, 255, 0.28);
+  box-shadow:
+    0 26px 72px rgba(54, 48, 82, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(13px);
+}
+
+.container::before {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 172, 191, 0.2), transparent 34%),
+    radial-gradient(circle at 94% 0%, rgba(140, 188, 236, 0.15), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 44%);
+}
+
+.section,
+.calc-side .section,
+.calc-main > .section.calc-card,
+.stat-table-card,
+.buff-panel,
+.character-data-summary {
+  color: var(--web-text);
+  background: var(--surface-overlay), var(--section-bg);
+  border-color: var(--web-line);
+  box-shadow:
+    0 16px 34px rgba(48, 45, 77, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(12px);
+}
+
+.section:hover {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.125), rgba(255, 255, 255, 0.05)),
+    rgba(91, 96, 132, 0.6);
+  border-color: var(--web-line-strong);
+  box-shadow:
+    0 18px 40px rgba(48, 45, 77, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.section-title,
+.buff-head-title {
+  color: #f6fbff;
+  text-shadow: 0 2px 5px rgba(48, 45, 77, 0.26);
+}
+
+.section-title::before,
+.result-label::before,
+.equipment-result-label::before,
+.buff-head-title::before,
+.combat-power-summary .result-label::before,
+.buff-gain-summary .result-label::before {
+  color: var(--web-gold);
+  text-shadow: 0 0 12px rgba(255, 230, 136, 0.4);
+}
+
+.tool-tabs-bar {
+  background: rgba(61, 67, 105, 0.62);
+  border-color: rgba(210, 225, 255, 0.16);
+  border-radius: 999px;
+  box-shadow:
+    0 12px 28px rgba(48, 45, 77, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.mode-tabs {
+  background: rgba(78, 82, 119, 0.34);
+  border-color: rgba(220, 232, 255, 0.22);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.tool-tabs-bar::before,
+.mode-tabs::before {
+  background:
+    radial-gradient(circle at 82% 22%, rgba(255, 255, 255, 0.22), transparent 42%),
+    linear-gradient(135deg, rgba(120, 183, 235, 0.96), rgba(126, 150, 218, 0.9));
+  border-color: rgba(214, 232, 255, 0.32);
+  box-shadow:
+    0 10px 22px rgba(67, 109, 169, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.view-tab,
+.mode-tab {
+  color: rgba(235, 242, 255, 0.76);
+  text-shadow: 0 1px 2px rgba(48, 45, 77, 0.22);
+}
+
+.view-tab:not(.active):hover,
+.mode-tab:hover {
+  background: rgba(212, 232, 255, 0.12);
+  color: #ffffff;
+}
+
+.view-tab.active,
+.mode-tab.active {
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 82% 22%, rgba(255, 255, 255, 0.22), transparent 42%),
+    linear-gradient(135deg, rgba(120, 183, 235, 0.96), rgba(126, 150, 218, 0.9));
+  border-color: rgba(214, 232, 255, 0.3);
+  box-shadow:
+    0 10px 22px rgba(67, 109, 169, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  text-shadow: 0 2px 4px rgba(42, 67, 115, 0.32);
+}
+
+.tool-tabs-bar .view-tab + .view-tab::before {
+  background: rgba(220, 232, 255, 0.2);
+}
+
+/* .character-data-summary 背景改由上方 .section 群組的 surface token 統一供應 */
+
+#jobSearchInput,
+input,
+select,
+.custom-select-trigger,
+.stat-table input,
+.equipment-grid .section > .input-group input,
+.equipment-grid .section > .input-group select,
+.calc-side .section .input-group input,
+.calc-side .section .input-group select,
+.calc-main > .section.calc-card .input-group input,
+.calc-main > .section.calc-card .input-group select {
+  color: #eef6ff;
+  -webkit-text-fill-color: #eef6ff;
+  color-scheme: dark;
+  background-color: rgba(58, 65, 101, 0.5);
+  border-color: rgba(221, 234, 255, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 8px rgba(42, 40, 67, 0.08);
+  text-shadow: 0 1px 2px rgba(42, 40, 67, 0.2);
+}
+
+input:focus,
+select:focus,
+#jobSearchInput:focus,
+.custom-select-trigger:focus-visible,
+/* 高特異度的外觀選擇器（上方群組）會壓過 input:focus，逐一補上 :focus 版本 */
+.stat-table input:focus,
+.equipment-grid .section > .input-group input:focus,
+.equipment-grid .section > .input-group select:focus,
+.calc-side .section .input-group input:focus,
+.calc-side .section .input-group select:focus,
+.calc-main > .section.calc-card .input-group input:focus,
+.calc-main > .section.calc-card .input-group select:focus {
+  border-color: rgba(255, 255, 255, 0.58);
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+input::placeholder,
+#jobSearchInput::placeholder {
+  color: rgba(220, 232, 246, 0.58);
+  -webkit-text-fill-color: rgba(220, 232, 246, 0.58);
+}
+
+input:disabled {
+  background: rgba(86, 92, 127, 0.48);
+  color: rgba(218, 229, 244, 0.66);
+  -webkit-text-fill-color: rgba(218, 229, 244, 0.66);
+}
+
+select option {
+  background: #59607d;
+  color: #f2f7ff;
+}
+
+#percentMain,
+#skillPercentMain,
+#percentSub,
+#skillPercentSub,
+#percentSubtwo,
+#skillPercentSubtwo,
+#percentAtk,
+#skillPercentAtk,
+#dmg,
+#skillDmg,
+#bossDmg,
+#skillBossDmg,
+#critDmg,
+#skillCritDmg,
+#famFinal,
+#adjEventBossDmg,
+#adjMentorBossDmg,
+#eqOldPercentMain,
+#eqOldPercentSub,
+#eqOldPercentSubtwo,
+#eqOldPercentAtk,
+#eqOldDmg,
+#eqOldBossDmg,
+#eqOldCritDmg,
+#eqOldFamFinal,
+#eqOldIgnoreDefense,
+#eqNewPercentMain,
+#eqNewPercentSub,
+#eqNewPercentSubtwo,
+#eqNewPercentAtk,
+#eqNewDmg,
+#eqNewBossDmg,
+#eqNewCritDmg,
+#eqNewFamFinal,
+#eqNewIgnoreDefense,
+#effPercentMain,
+#effPercentSub,
+#effPercentSubtwo,
+#effPercentAtk,
+#effDmg,
+#effBossDmg,
+#effCritDmg,
+#effFamFinal,
+#effIgnoreDefense,
+#effMonsterDefense {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Ctext x='9' y='13' text-anchor='middle' font-family='Arial, sans-serif' font-size='13' font-weight='800' fill='%23d4deec'%3E%25%3C/text%3E%3C/svg%3E");
+}
+
+.combat-power-summary,
+.result-display,
+.equipment-result-card {
+  background: var(--surface-hero-glow), var(--surface-overlay), var(--section-bg);
+  border-color: rgba(221, 234, 255, 0.22);
+  border-radius: 18px;
+  box-shadow:
+    0 16px 36px rgba(48, 45, 77, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.result-label,
+.equipment-result-label,
+.combat-power-summary .result-label,
+.buff-gain-summary .result-label {
+  color: #edf5ff;
+  text-shadow: 0 2px 4px rgba(42, 40, 67, 0.26);
+}
+
+.result-value,
+.equipment-result-value,
+.combat-power-summary .result-value {
+  color: var(--web-cyan);
+  text-shadow: 0 4px 18px rgba(98, 215, 255, 0.28);
+}
+
+.buff-gain-summary .result-value {
+  color: var(--web-violet);
+  text-shadow: 0 4px 18px rgba(212, 184, 255, 0.28);
+}
+
+.st-row--head,
+.st-colhead,
+.st-rowhead,
+.input-group label,
+.equipment-grid .section > .input-group label,
+.calc-side .section .input-group label,
+.calc-main > .section.calc-card .input-group label,
+.label-value,
+.st-cell-label,
+.job-combobox-label {
+  color: #e8f0fb;
+  text-shadow: 0 1px 2px rgba(42, 40, 67, 0.2);
+}
+
+.st-row:not(.st-row--head) {
+  border-color: rgba(220, 232, 255, 0.16);
+}
+
+.label-tag,
+.checkbox-status,
+.final-auto-status {
+  background: rgba(143, 190, 229, 0.18);
+  border-color: rgba(220, 232, 255, 0.18);
+  color: #dceeff;
+}
+
+.checkbox-status.active,
+.final-auto-status .checkbox-status.active {
+  background: rgba(127, 183, 236, 0.24);
+  color: #ffffff;
+}
+
+.file-btn,
+.eff-copy-combat-btn {
+  color: #f0f6ff;
+  background: rgba(104, 111, 151, 0.42);
+  border-color: rgba(221, 234, 255, 0.22);
+  box-shadow:
+    0 10px 22px rgba(48, 45, 77, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  text-shadow: 0 1px 2px rgba(42, 40, 67, 0.28);
+}
+
+.file-btn:hover,
+.eff-copy-combat-btn:hover {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(120, 183, 235, 0.92), rgba(126, 150, 218, 0.88));
+  border-color: rgba(221, 234, 255, 0.32);
+  box-shadow: 0 12px 24px rgba(67, 109, 169, 0.26);
+}
+
+.custom-select-list,
+.job-option-list {
+  background: linear-gradient(180deg, rgba(104, 111, 151, 0.98), rgba(76, 82, 121, 0.98));
+  border-color: rgba(221, 234, 255, 0.24);
+  box-shadow: 0 22px 46px rgba(42, 40, 67, 0.3);
+}
+
+.custom-select-option,
+.job-option-button,
+.job-option-empty {
+  color: #f2f7ff;
+}
+
+.custom-select-option:hover,
+.custom-select-option:focus-visible,
+.job-option-button:hover,
+.job-option-button.is-active {
+  background: rgba(143, 190, 229, 0.2);
+  border-color: rgba(221, 234, 255, 0.22);
+}
+
+.custom-select-option.is-selected,
+.job-option-button.is-selected {
+  background: rgba(127, 183, 236, 0.25);
+  border-color: rgba(221, 234, 255, 0.28);
+}
+
+/* .buff-panel 背景改由上方 .section 群組的 surface token 統一供應 */
+
+.buff-head {
+  border-bottom-color: rgba(220, 232, 255, 0.18);
+}
+
+.buff-master {
+  color: #d9e5f5;
+}
+
+.buff-section-title {
+  color: rgba(226, 242, 255, 0.95);
+  border-bottom-color: rgba(220, 232, 255, 0.16);
+  border-left-color: rgba(143, 210, 255, 0.72);
+  background: transparent;
+}
+
+.buff-section-title::before {
+  background: linear-gradient(90deg, rgba(143, 210, 255, 0.7), transparent);
+  box-shadow: none;
+}
+
+.buff-icon-wrap {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.05)),
+    rgba(45, 52, 82, 0.58);
+  border-color: rgba(221, 234, 255, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    0 5px 12px rgba(42, 40, 67, 0.22);
+  transition: none;
+}
+
+.buff-icon {
+  filter: grayscale(0.28) saturate(0.92) brightness(0.82);
+  opacity: 0.84;
+  transition: none;
+}
+
+.buff-item--on .buff-icon {
+  filter: saturate(1.08) brightness(1.05);
+  opacity: 1;
+}
+
+.buff-item--on .buff-icon-wrap {
+  border-color: rgba(143, 210, 255, 0.48);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  outline: 1px solid rgba(221, 234, 255, 0.5);
+  outline-offset: 0;
+}
+
+.checkbox-label-wrap input[type='checkbox'] {
+  background: rgba(53, 59, 94, 0.62);
+  border-color: rgba(221, 234, 255, 0.3);
+  transition: none;
+}
+
+.checkbox-label-wrap input[type='checkbox']:checked {
+  background: var(--web-blue);
+  border-color: rgba(221, 234, 255, 0.46);
+}
+
+.buff-control--level .buff-level {
+  background: rgba(53, 59, 94, 0.62);
+  border-color: rgba(221, 234, 255, 0.22);
+  color: #edf6ff;
+  -webkit-text-fill-color: #edf6ff;
+}
+
+.buff-control--check {
+  position: static;
+  right: auto;
+  bottom: auto;
+  width: auto;
+  height: 18px;
+  pointer-events: auto;
+}
+
+.buff-control--check .buff-check {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  accent-color: var(--web-blue);
+  opacity: 1;
+}
+
+.buff-master-check {
+  accent-color: var(--web-blue);
+}
+
+.buff-control--check .buff-check:not(:checked) {
+  opacity: 1;
+}
+
+.equipment-efficiency-combat-toggle,
+.equipment-efficiency-custom-panel summary,
+.equipment-efficiency-mode-btn,
+.api-summary-item,
+.api-raw-details summary {
+  background: rgba(80, 86, 124, 0.46);
+  border-color: rgba(221, 234, 255, 0.2);
+  color: #edf6ff;
+}
+
+.equipment-efficiency-mode-btn.active,
+.equipment-efficiency-combat-toggle:has(input:checked) {
+  background: rgba(127, 183, 236, 0.24);
+  border-color: rgba(221, 234, 255, 0.28);
+  color: #ffffff;
+}
+
+.api-status,
+.api-summary-label,
+.api-equipment-overview-sub,
+.api-equipment-detail-empty {
+  color: #d5deec;
+}
+
+.api-summary-value,
+.api-equipment-overview-title {
+  color: #f4f9ff;
+}
+
+#apiImportView .section::before {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(255, 172, 191, 0.2), transparent 36%),
+    radial-gradient(circle at 96% 6%, rgba(127, 183, 236, 0.14), transparent 38%);
+}

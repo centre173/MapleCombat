@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+*.local
+.DS_Store
+.vs/
+.claude/
+*.log
+/src-tauri/target
+/src-tauri/gen/schemas

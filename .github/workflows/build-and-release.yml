@@ -1,0 +1,90 @@
+name: Build and Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build .exe & Create Release
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test (golden values)
+        run: npm run test
+
+      - name: Build Tauri app (portable .exe + NSIS installer)
+        run: npm run tauri build
+
+      - name: Resolve version & tag
+        id: ver
+        shell: pwsh
+        run: |
+          $v = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ($env:GITHUB_REF -like 'refs/tags/*') {
+            $tag = $env:GITHUB_REF -replace 'refs/tags/', ''
+          } else {
+            $tag = "v$v"
+          }
+          "version=$v" >> $env:GITHUB_OUTPUT
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+
+      - name: Stage portable exe (stable ASCII name)
+        shell: pwsh
+        run: |
+          $rel = "src-tauri/target/release"
+          # 主程式為 release 根目錄中最大的 .exe（依賴/建置產物在子目錄）
+          $exe = Get-ChildItem $rel -Filter *.exe -File | Sort-Object Length -Descending | Select-Object -First 1
+          if (-not $exe) { Write-Error "portable exe not found"; exit 1 }
+          Copy-Item $exe.FullName "$rel/MapleCombat-${{ steps.ver.outputs.version }}.exe"
+
+      - name: Stage NSIS installer (stable ASCII name)
+        shell: pwsh
+        run: |
+          $nsis = "src-tauri/target/release/bundle/nsis"
+          $installer = Get-ChildItem $nsis -Filter "*-setup.exe" -File | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $installer) { Write-Error "NSIS installer not found"; exit 1 }
+          Copy-Item $installer.FullName "src-tauri/target/release/MapleCombat-${{ steps.ver.outputs.version }}-setup-x64.exe"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: ${{ steps.ver.outputs.tag }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            新楓之谷戰鬥力計算機（MapleCombat）${{ steps.ver.outputs.tag }}
+
+            ## 下載
+            - 可攜版 `MapleCombat-${{ steps.ver.outputs.version }}.exe`：免安裝，下載直接執行。
+            - 安裝檔 `MapleCombat-${{ steps.ver.outputs.version }}-setup-x64.exe`（NSIS）：安裝後建立開始選單捷徑，可由控制台移除。
+
+          files: |
+            src-tauri/target/release/MapleCombat-${{ steps.ver.outputs.version }}-setup-x64.exe
+            src-tauri/target/release/MapleCombat-${{ steps.ver.outputs.version }}.exe

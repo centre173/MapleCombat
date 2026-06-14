@@ -1,0 +1,1842 @@
+/* Calculator: shared cards, inputs, custom selects, battle-power tables, responsive rules. */
+
+.buff-gain-summary .result-item {
+  position: relative;
+}
+
+.buff-gain-summary .buff-gain-info {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: auto;
+  z-index: 2;
+}
+
+.buff-gain-summary .buff-gain-info .buff-info-tooltip {
+  /* 觸發鈕在卡片右上角：tooltip 以右緣對齊、往左展開，永遠不會溢出視窗右邊。 */
+  left: auto;
+  right: 0;
+  width: min(360px, calc(100vw - 32px));
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.section {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  column-gap: 14px;
+  row-gap: 11px;
+  background: var(--section-bg);
+  padding: 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow:
+    0 14px 30px rgba(4, 11, 24, 0.15),
+    0 0 10px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
+}
+
+.section:has(.custom-select.is-open) {
+  z-index: 680;
+}
+
+/* 向上展開的下拉會蓋到同卡其他儲存格：抬升開啟中的儲存格贏過兄弟（含 z-index:20 的其他下拉）。 */
+.st-cell:has(.custom-select.is-open),
+.input-group:has(.custom-select.is-open) {
+  position: relative;
+  z-index: 680;
+}
+
+.section:hover {
+  border-color: rgba(202, 224, 252, 0.3);
+  background: rgba(54, 72, 102, 0.365);
+  box-shadow:
+    0 16px 34px rgba(4, 11, 24, 0.17),
+    0 0 0 1px rgba(255, 255, 255, 0.022),
+    0 0 16px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.section-title {
+  grid-column: 1 / -1;
+  width: fit-content;
+  color: var(--text-color);
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding: 0;
+  border-left: 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  letter-spacing: 0;
+}
+
+.section-title::before {
+  content: '✦';
+  width: auto;
+  height: auto;
+  flex: 0 0 auto;
+  background: none;
+  color: #ffe88a;
+  font-size: 17px;
+  line-height: 1;
+  text-shadow: 0 0 8px rgba(255, 232, 138, 0.22);
+}
+
+.section-title-row {
+  grid-column: 1 / -1;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.section-title-row > .section-title {
+  grid-column: auto;
+  margin-bottom: 0;
+}
+
+.main-stat-guide {
+  z-index: 530;
+}
+
+.stat-table-card:has(.main-stat-guide:hover),
+.stat-table-card:has(.main-stat-guide:focus-within) {
+  z-index: 540;
+}
+
+.weapon-correction-info {
+  z-index: 530;
+}
+
+.stat-table-card:has(.weapon-correction-info:hover),
+.stat-table-card:has(.weapon-correction-info:focus-within) {
+  z-index: 540;
+}
+
+.buff-info-tooltip.weapon-correction-tooltip {
+  width: min(300px, calc(100vw - 28px));
+}
+
+.weapon-correction-list {
+  grid-template-columns: 1fr;
+}
+
+.buff-info-tooltip.main-stat-guide-tooltip {
+  left: 0;
+  right: auto;
+  width: min(360px, calc(100vw - 28px));
+  max-height: none;
+  padding: 8px;
+  border: 1px solid rgba(220, 232, 255, 0.18);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(28, 34, 50, 0.94), rgba(18, 24, 38, 0.94));
+  box-shadow:
+    0 18px 34px rgba(4, 11, 24, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  overflow: visible;
+}
+
+.main-stat-guide-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 18px 30px rgba(4, 11, 24, 0.36));
+}
+
+.input-group {
+  margin-bottom: var(--space-3);
+}
+
+label {
+  display: block;
+  font-size: var(--fs-base);
+  color: #d0deee;
+  font-weight: 600;
+  margin-bottom: 7px;
+  letter-spacing: 0;
+}
+
+.label-tag {
+  display: inline-block;
+  margin-right: 4px;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: 0;
+  color: #bcd6f0;
+  background: var(--accent-soft);
+  border: 1px solid rgba(109, 174, 233, 0.22);
+  border-radius: 5px;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+
+.label-value {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+input,
+select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  background: var(--input-bg);
+  border: 1px solid rgba(220, 235, 255, 0.22);
+  color: var(--text-color);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-md);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition: all 0.2s ease;
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 4px 10px rgba(4, 11, 24, 0.08);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #a7b7ca;
+}
+
+select {
+  color-scheme: dark;
+  color: #edf6ff;
+  text-align: center;
+  text-align-last: center;
+}
+
+select option {
+  color: #edf6ff;
+  background: #263b58;
+  text-align: center;
+  font-weight: 700;
+}
+
+select option:checked {
+  color: #ffffff;
+  background: #4f79a1;
+}
+
+select option:hover,
+select option:focus {
+  color: #ffffff;
+  background: #5e83ac;
+}
+
+/* 隱藏的原生 select（a11y 後備）必須維持 1px：用 !important 蓋過各處
+           「.input-group select { width:100% }」規則，否則 position:absolute 會以
+           祖先寬度撐大，在窄版造成水平捲動 */
+select.custom-select-native {
+  position: absolute;
+  width: 1px !important;
+  max-width: 1px !important;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.custom-select {
+  position: relative;
+  justify-self: end;
+  width: 100%;
+  max-width: 132px;
+  z-index: 20;
+}
+
+.custom-select.is-open {
+  z-index: 200;
+}
+
+.custom-select-trigger {
+  position: relative;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 34px 8px 10px;
+  border: 1px solid rgba(220, 235, 255, 0.22);
+  border-radius: var(--radius-sm);
+  background: var(--input-bg);
+  color: var(--text-color);
+  box-shadow:
+    inset 0 1px 0 var(--glass-highlight),
+    0 4px 10px rgba(4, 11, 24, 0.08);
+  font: inherit;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+}
+
+#weaponSet + .custom-select .custom-select-trigger,
+#flameLevel + .custom-select .custom-select-trigger,
+#ruinFinal + .custom-select .custom-select-trigger {
+  padding-left: 30px;
+  padding-right: 30px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#weaponSet,
+#flameLevel {
+  white-space: nowrap;
+}
+
+.custom-select-trigger::after {
+  content: '';
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-65%) rotate(45deg);
+  opacity: 0.9;
+}
+
+.custom-select.is-open .custom-select-trigger {
+  border-color: rgba(255, 255, 255, 0.58);
+  background: rgba(28, 40, 62, 0.55);
+  box-shadow: var(--focus-ring);
+}
+
+.custom-select-list {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  display: none;
+  overflow: hidden;
+  border: 1px solid rgba(210, 230, 255, 0.28);
+  border-radius: var(--radius-sm);
+  background: #223754;
+  box-shadow:
+    0 18px 34px rgba(4, 11, 24, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.custom-select.is-open .custom-select-list {
+  display: block;
+}
+
+/* 下方空間不足時往上展開（靈魂寶珠在面板底部會用到，避免被視窗下緣切掉） */
+.custom-select.is-up .custom-select-list {
+  top: auto;
+  bottom: calc(100% + 5px);
+}
+
+.custom-select-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 0;
+  border-bottom: 1px solid rgba(210, 230, 255, 0.08);
+  background: transparent;
+  color: #edf6ff;
+  font: inherit;
+  font-size: var(--fs-md);
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+}
+
+.custom-select-option:last-child {
+  border-bottom: 0;
+}
+
+.custom-select-option:hover,
+.custom-select-option:focus-visible {
+  background: rgba(109, 174, 233, 0.22);
+  color: #ffffff;
+  outline: none;
+}
+
+.custom-select-option.is-selected {
+  background: rgba(109, 174, 233, 0.32);
+  color: #ffffff;
+}
+
+input:focus,
+select:focus {
+  border-color: rgba(255, 255, 255, 0.58);
+  background: rgba(28, 40, 62, 0.55);
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+/* Clear, consistent keyboard-focus ring for interactive controls
+           (mouse clicks don't trigger :focus-visible, so no click outline) */
+.file-btn:focus-visible,
+.view-tab:focus-visible,
+.mode-tab:focus-visible,
+.equipment-efficiency-mode-btn:focus-visible,
+.job-combobox-toggle:focus-visible,
+.job-option-button:focus-visible,
+.checkbox-label-wrap input[type='checkbox']:focus-visible,
+details summary:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+input:disabled {
+  background: var(--disabled-bg);
+  color: #8fa3ba;
+  border-color: rgba(116, 139, 169, 0.18);
+  cursor: not-allowed;
+}
+
+.equipment-grid .section > .input-group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--equipment-input-width);
+  align-items: center;
+  gap: clamp(6px, 1vw, 9px);
+  margin-bottom: 0;
+}
+
+.equipment-grid .section > .input-group label {
+  min-width: 0;
+  margin-bottom: 0;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.equipment-grid .section > .input-group input,
+.equipment-grid .section > .input-group select {
+  justify-self: end;
+  max-width: var(--equipment-input-width);
+}
+
+.equipment-grid .section > .input-group input:not([type='number']),
+.equipment-grid .section > .input-group select {
+  text-align: right;
+}
+
+/* 帶單位（%）的輸入欄：% 疊在輸入框內右側，與數值同樣式 */
+.equipment-grid .section > .input-group.has-input-unit .equipment-input-wrap {
+  grid-column: 2;
+  justify-self: end;
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: var(--equipment-input-width);
+}
+
+.equipment-grid .section > .input-group.has-input-unit .equipment-input-wrap input {
+  width: 100%;
+  max-width: none;
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+.equipment-grid .section > .input-group.has-input-unit .equipment-input-unit {
+  display: none;
+}
+
+.equipment-grid .section > .checkbox-group {
+  grid-column: 1 / -1;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(246, 250, 255, 0.08);
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(190, 211, 235, 0.16);
+  margin-bottom: var(--space-3);
+}
+
+.checkbox-label-wrap {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label-wrap label {
+  margin: 0;
+  cursor: pointer;
+}
+
+.checkbox-status {
+  font-size: var(--fs-base);
+  font-weight: 700;
+  color: #a4b1c2;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.checkbox-status.active {
+  color: var(--result-color);
+  text-shadow: none;
+}
+
+/* ===== 戰鬥力數值：半表格化版面 ===== */
+.calc-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--calc-layout-gap);
+  align-items: start;
+}
+
+.calc-main,
+.calc-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+/* main 設為 container：內部欄數與表格卡片化都依「main 自身寬度」決定，
+           與 Buff 在右（窄欄）或在下（整寬）無關，避免視窗斷點下的非單調問題 */
+#calculatorMode .calc-main,
+#effStatsMode .calc-main {
+  container-type: inline-size;
+}
+
+/* main 內部固定 2 欄；窄時由下方 @container 收成 1 欄。
+           用固定 2 欄而非 auto-fit，避免超寬螢幕出現稀疏的第 3 欄 */
+#calculatorMode .calc-main {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: row dense;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+#calculatorMode .calc-main > .section {
+  min-width: 0;
+}
+
+/* 寬表與「其他」卡跨整列；特殊能力值、武器自動各佔一欄 */
+#calculatorMode .calc-main > .section:has(.stat-table--main),
+#calculatorMode .calc-main > .section:has(.stat-table--dmg),
+#calculatorMode .calc-main > .section:has(.stat-table--bonus) {
+  grid-column: 1 / -1;
+}
+
+#effStatsMode .calc-main {
+  width: 100%;
+  max-width: 760px;
+}
+
+/* ≥768：Buff 留在右側雙欄。Buff 欄寬用統一的 --calc-side-width（連續函數，
+           1120 不再有寬度跳動 → main 寬度單調變化，主要能力值不會反覆切換表格/卡片）。 */
+@media (min-width: 768px) {
+  #calculatorMode .calc-layout,
+  #effStatsMode .calc-layout {
+    grid-template-columns: minmax(0, 1fr) var(--calc-side-width);
+  }
+
+  /* 上方摘要列對齊主欄寬度，讓側欄頂端的「計入Buff增幅」框上移到與
+               「當前戰鬥力」同一水平、不重疊；.buff-gain-summary 維持填滿側欄故排除。
+               注意：此處只對齊「當前戰鬥力」框，角色資料（左上）不需與之同步。 */
+  #characterInputView:has(#calculatorMode.active) .combat-power-summary:not(.buff-gain-summary),
+  #characterInputView:has(#effStatsMode.active) .combat-power-summary:not(.buff-gain-summary) {
+    width: var(--calc-main-width);
+    max-width: var(--summary-max-width);
+  }
+
+  /* 側欄上移，讓「計入Buff增幅」始終與「當前戰鬥力」平行（跨 1120 不掉下去） */
+  #calculatorMode .calc-side,
+  #effStatsMode .calc-side {
+    margin-top: calc(-86px - var(--space-5));
+  }
+
+  #characterInputView:has(#resultDisplayPanel.is-value-wrapped) #calculatorMode .calc-side,
+  #characterInputView:has(#resultDisplayPanel.is-value-wrapped) #effStatsMode .calc-side {
+    margin-top: calc(-128px - var(--space-5));
+  }
+}
+
+/* 表格卡：覆寫 .section 的 grid 版面，改為單欄堆疊 */
+.stat-table-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  /* 表格欄首列佔了一行高度，縮短上方留白讓整體貼近一般（非表格）區塊 */
+  padding-top: 14px;
+}
+
+/* 卡片已用 flex gap 控制間距，標題不再額外加底部間距，避免上方留白過多 */
+.stat-table-card > .section-title,
+.stat-table-card > .section-title-row {
+  margin-bottom: 0;
+}
+
+.stat-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.st-row {
+  display: grid;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.stat-table--main .st-row {
+  grid-template-columns: minmax(48px, 64px) repeat(5, minmax(0, 1fr));
+  gap: 8px 6px;
+}
+
+.stat-table--dmg .st-row {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px 10px;
+}
+
+#calculatorMode .stat-table-card:has(.stat-table--dmg) {
+  gap: var(--space-2);
+}
+
+.stat-table--bonus .st-row {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px 10px;
+}
+
+.stat-table--effmain .st-row {
+  grid-template-columns: minmax(58px, 96px) repeat(3, minmax(0, 1fr));
+}
+
+/* 特殊能力值：寬版三欄，窄版與主要能力值同步改雙欄 */
+.special-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+
+.special-stats-grid > .input-group {
+  margin-bottom: 0;
+}
+
+.st-row--head {
+  align-items: end;
+  padding-bottom: 2px;
+  border-bottom: 1px solid rgba(190, 211, 235, 0.12);
+  margin-bottom: 0;
+}
+
+.st-colhead {
+  min-width: 0;
+  max-width: 100%;
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.92);
+  text-align: center;
+  letter-spacing: 0;
+  /* 欄名（基本數值…）整段不拆字；寬度足夠時與標記同一行，
+               不足時整段換到第二行，避免「基本數」「值」被截斷 */
+  word-break: keep-all;
+}
+
+.st-colhead .label-tag {
+  margin: 0 4px 0 0;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.st-colhead .label-tag,
+.st-colhead .label-value {
+  max-width: 100%;
+}
+
+.st-colhead .label-value {
+  display: inline;
+}
+
+.st-rowhead {
+  font-size: var(--fs-md);
+  font-weight: 800;
+  color: var(--text-color);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.st-rowhead--check {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.st-rowhead--check .checkbox-group {
+  margin-bottom: 0;
+  padding: 4px 8px;
+  gap: 6px;
+  border-radius: 999px;
+  background: rgba(246, 250, 255, 0.07);
+  border-color: rgba(190, 211, 235, 0.14);
+}
+
+.st-rowhead--check .checkbox-label-wrap {
+  gap: 6px;
+}
+
+.st-rowhead--check .checkbox-label-wrap label {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.st-rowhead--check .checkbox-label-wrap input[type='checkbox'] {
+  width: 15px;
+  height: 15px;
+  min-height: 15px;
+}
+
+.st-rowhead--check .checkbox-status {
+  font-size: 12px;
+}
+
+.st-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.st-cell-label {
+  display: none;
+  word-break: keep-all;
+}
+
+.stat-table--dmg .st-cell-label,
+.stat-table--bonus .st-cell-label {
+  display: block;
+  font-size: var(--fs-base);
+  font-weight: 600;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.92);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.stat-table--dmg .label-tag {
+  margin-right: 4px;
+}
+
+.stat-table--dmg .st-cell,
+.stat-table--bonus .st-cell {
+  gap: 6px;
+}
+
+/* 傷害欄位說明：問號鈕緊貼「傷害」標題右側（行內，不換行、不推移輸入框）。
+   標籤改 inline-flex 並 overflow:visible，讓問號與 tooltip 不被原本的 ellipsis 裁掉。 */
+.stat-table--dmg .st-cell--info .st-cell-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  overflow: visible;
+  max-width: none;
+}
+
+.st-cell--info .dmg-bug-info {
+  flex: 0 0 auto;
+}
+
+.st-cell--info .dmg-bug-info .buff-info-trigger {
+  width: 15px;
+  height: 15px;
+  min-height: 15px;
+  font-size: 9px;
+}
+
+/* 此儲存格在傷害列最左側，tooltip 以左緣對齊往右展開即可完整顯示、不溢出。 */
+.st-cell--info .dmg-bug-info .buff-info-tooltip {
+  width: min(260px, calc(100vw - 32px));
+  max-height: none;
+  overflow: visible;
+  /* 標籤的 white-space:nowrap / 小字級 / 粗體會被繼承，這裡一併覆寫回標準 tooltip 字體，
+     與右上結果 tooltip 一致（兩者本應同為 body 預設字，差別只因此處巢狀在小標籤內）。 */
+  white-space: normal;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.bonus-extra-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px 12px;
+  margin-top: 2px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(190, 211, 235, 0.14);
+}
+
+.bonus-extra-grid--special {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.bonus-extra-grid .input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.bonus-extra-grid .input-group label {
+  align-self: flex-start;
+  margin-bottom: 0;
+}
+
+.bonus-extra-grid .input-group input,
+.bonus-extra-grid .input-group select,
+.bonus-extra-grid .input-group .custom-select {
+  width: 100%;
+  max-width: none;
+}
+
+.bonus-extra-grid #ruinFinal + .custom-select .custom-select-trigger {
+  min-height: 40px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.power-coefficient-combobox {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.power-coefficient-combobox input {
+  width: 100%;
+  padding-right: 34px;
+}
+
+.st-cell:has(.power-coefficient-combobox.is-open) {
+  z-index: 570;
+}
+
+.power-coefficient-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 32px;
+  height: 100%;
+  border: 0;
+  border-radius: 0 7px 7px 0;
+  background: transparent;
+  color: #edf6ff;
+  cursor: pointer;
+}
+
+.power-coefficient-toggle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 1.6px solid currentColor;
+  border-bottom: 1.6px solid currentColor;
+  transform: translate(-50%, -62%) rotate(45deg);
+  opacity: 0.72;
+}
+
+.power-coefficient-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 560;
+  overflow: hidden;
+  border: 1px solid rgba(221, 234, 255, 0.24);
+  border-radius: 7px;
+  background: linear-gradient(180deg, rgba(104, 111, 151, 0.98), rgba(76, 82, 121, 0.98));
+  color: #f2f7ff;
+  box-shadow: 0 22px 46px rgba(42, 40, 67, 0.3);
+}
+
+.power-coefficient-combobox.is-open .power-coefficient-menu {
+  display: block;
+}
+
+.power-coefficient-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 0;
+  border-bottom: 1px solid rgba(210, 230, 255, 0.08);
+  background: transparent;
+  color: #f2f7ff;
+  font: inherit;
+  font-size: var(--fs-md);
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+}
+
+.power-coefficient-option:last-child {
+  border-bottom: 0;
+}
+
+.power-coefficient-option:hover,
+.power-coefficient-option:focus-visible {
+  background: rgba(143, 190, 229, 0.2);
+  color: #ffffff;
+  outline: none;
+}
+
+.stat-table input {
+  text-align: center;
+  padding: 6px 5px;
+}
+
+.stat-table input,
+.stat-table select,
+.stat-table .custom-select-trigger {
+  height: 36px;
+  min-height: 36px;
+}
+
+.stat-table .custom-select {
+  max-width: none;
+}
+
+/* 右側設定卡自行堆疊 */
+.calc-side .section {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px 12px;
+  padding: var(--space-4);
+}
+
+.calc-main > .section.calc-card {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: var(--space-4);
+}
+
+#effBaseHPGroup .input-group {
+  width: min(100%, 220px);
+  align-self: flex-start;
+}
+
+.calc-side .section > .section-title,
+.calc-main > .section.calc-card > .section-title {
+  grid-column: 1 / -1;
+  margin-bottom: 2px;
+}
+
+.calc-side .section .input-group,
+.calc-main > .section.calc-card .input-group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(112px, 156px);
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0;
+}
+
+.calc-side .section .input-group label,
+.calc-main > .section.calc-card .input-group label {
+  margin-bottom: 0;
+  overflow-wrap: anywhere;
+}
+
+.calc-side .section .input-group input,
+.calc-side .section .input-group select,
+.calc-side .section .input-group .custom-select,
+.calc-main > .section.calc-card .input-group input,
+.calc-main > .section.calc-card .input-group select {
+  justify-self: end;
+  width: 100%;
+  max-width: 156px;
+  text-align: center;
+}
+
+.calc-side .section .input-group select,
+.calc-main > .section.calc-card .input-group select {
+  text-align-last: center;
+}
+
+/* 窄版：表格改為卡片化（門檻對齊內部多欄收合點 768） */
+/* 表格卡片化：依 main 自身寬度（container）決定，與 Buff 在右/在下無關 */
+@container (max-width: 600px) {
+  /* main 收成單欄：所有區塊跨整列 */
+  #calculatorMode .calc-main > .section {
+    grid-column: 1 / -1;
+  }
+
+  .st-row--head {
+    display: none;
+  }
+
+  /* 卡片化共用樣式 */
+  .stat-table--main .st-row,
+  .stat-table--bonus .st-row,
+  .stat-table--effmain .st-row {
+    gap: 8px 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: rgba(42, 56, 84, 0.2);
+  }
+
+  /* 窄版（main <460）欄數：固定數讓欄位整列填滿、不留尾端空格
+               （改用固定欄數而非 auto-fit，避免出現「擠到左邊」的多餘空白欄） */
+  .stat-table--main .st-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .stat-table--bonus .st-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .stat-table--effmain .st-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #calculatorMode .stat-table--main,
+  #calculatorMode .stat-table--bonus,
+  #effStatsMode .stat-table--effmain {
+    gap: 0;
+  }
+
+  #calculatorMode .stat-table--main .st-row,
+  #calculatorMode .stat-table--bonus .st-row,
+  #effStatsMode .stat-table--effmain .st-row {
+    padding: 6px 0;
+    border: 0;
+    border-top: 1px solid rgba(190, 211, 235, 0.12);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  #calculatorMode .stat-table--main .st-row--head + .st-row,
+  #calculatorMode .stat-table--bonus .st-row--head + .st-row,
+  #effStatsMode .stat-table--effmain .st-row--head + .st-row {
+    border-top: 0;
+    padding-top: 4px;
+  }
+
+  .st-rowhead {
+    grid-column: 1 / -1;
+    font-size: var(--fs-lg);
+  }
+
+  .st-rowhead--check {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .st-cell-label {
+    display: block;
+    font-size: var(--fs-base);
+    font-weight: 600;
+    line-height: 1.2;
+    color: rgba(255, 255, 255, 0.92);
+    /* 過長標籤（如「%未套用數值」「技能.消耗數值」）截斷成 … 而非換行撐高 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .st-cell {
+    gap: 2px;
+  }
+
+  /* 特殊能力值：每格 label 在上、輸入框在下 */
+  .stat-table--dmg .st-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .stat-table--dmg .st-cell-label {
+    display: block;
+  }
+
+  .bonus-extra-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .special-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 14px;
+  }
+}
+
+/* 卡片化但 main 仍夠寬（420–600）：每個表用「自身欄位數」當欄數，整列填滿一排
+           （過長標籤以 … 截斷），避免擠到左邊、同時把每列壓成一排、降低高度 */
+@container (min-width: 420px) and (max-width: 600px) {
+  .stat-table--main .st-row {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .stat-table--bonus .st-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .stat-table--effmain .st-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .special-stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .bonus-extra-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .bonus-extra-grid--special {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* 頂部工具列不在 main 內，維持視窗斷點 */
+@media (max-width: 767px) {
+  .header-wrap {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .header-actions {
+    margin-left: auto;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 640px) {
+  .character-data-summary {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+  }
+  .character-data-summary-head {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+  }
+  .character-data-summary .mode-tabs,
+  .character-data-summary .job-picker {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .character-data-summary .mode-tabs {
+    grid-column: 1 / -1;
+  }
+  .character-data-summary .data-copy-btn {
+    grid-column: 2;
+    flex-basis: auto;
+    min-width: 0;
+    width: 100%;
+    justify-content: center;
+    padding-inline: 10px;
+  }
+  .character-data-summary .mode-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .character-data-summary .mode-tab {
+    min-width: 0;
+    padding-inline: 12px;
+  }
+  .character-data-summary .job-picker {
+    grid-column: 1;
+    flex: 0 0 auto;
+    margin-right: 0;
+  }
+  .character-data-summary .job-combobox,
+  .character-data-summary .job-combobox-control,
+  .character-data-summary #jobSearchInput {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .character-data-summary .job-combobox-label {
+    display: none;
+  }
+  .character-data-summary #jobSearchInput {
+    padding-left: 32px;
+    padding-right: 32px;
+    text-align: center;
+  }
+  .character-data-summary .job-option-list[hidden] {
+    display: none !important;
+  }
+}
+
+@media (min-width: 416px) and (max-width: 630px) {
+  .character-data-summary-head {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .character-data-summary .data-copy-btn {
+    --data-copy-btn-width: auto;
+    width: 100%;
+    min-width: 0;
+    padding-inline: 6px;
+    font-size: 14px;
+  }
+
+  .character-data-summary .job-picker,
+  .character-data-summary .job-combobox,
+  .character-data-summary .job-combobox-control {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .character-data-summary #jobSearchInput {
+    padding-left: 30px;
+    padding-right: 32px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .character-data-summary .job-combobox-toggle {
+    right: 3px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.compact-section {
+  padding: var(--space-4);
+  row-gap: 9px;
+  column-gap: 12px;
+}
+
+.compact-section .section-title {
+  margin-bottom: 2px;
+  padding: 0;
+  font-size: var(--fs-lg);
+}
+
+.compact-section label {
+  font-size: var(--fs-base);
+  line-height: 1.35;
+}
+
+.compact-section input,
+.compact-section select {
+  padding: 8px 10px;
+  min-height: 42px;
+}
+
+#calculatorMode .calc-side .section .input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 7px;
+}
+
+#calculatorMode .calc-side .section .input-group label {
+  margin-bottom: 0;
+  align-self: flex-start;
+}
+
+#calculatorMode .calc-side .section .input-group input,
+#calculatorMode .calc-side .section .input-group select,
+#calculatorMode .calc-side .section .input-group .custom-select {
+  justify-self: stretch;
+  width: 100%;
+  max-width: none;
+}
+
+.compact-subtitle {
+  grid-column: 1 / -1;
+  width: fit-content;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(109, 174, 233, 0.14);
+  border: 1px solid rgba(109, 174, 233, 0.2);
+  color: #b9d6f4;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.compact-subtitle:first-of-type {
+  margin-top: 0;
+}
+
+.final-auto-status {
+  display: none;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 0 0 auto;
+  gap: 0;
+  width: fit-content;
+  min-height: 24px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(142, 215, 255, 0.12);
+  border: 1px solid rgba(142, 215, 255, 0.24);
+}
+
+body.app-loading #dynamicFieldsRow,
+body.app-loading #dynamicStarRow {
+  display: none;
+}
+
+.compat-hidden-checkbox {
+  display: none;
+}
+
+.checkbox-label-wrap input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-content: center;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  padding: 0;
+  flex: 0 0 auto;
+  background: rgba(246, 250, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(5, 14, 28, 0.16);
+  cursor: pointer;
+}
+
+.checkbox-label-wrap input[type='checkbox']::before {
+  content: '';
+  width: 5px;
+  height: 9px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transform-origin: center;
+  transition: transform 0.12s ease;
+}
+
+.checkbox-label-wrap input[type='checkbox']:checked {
+  background: var(--accent-color);
+  border-color: rgba(109, 174, 233, 0.8);
+  box-shadow: 0 0 0 2px rgba(109, 174, 233, 0.16);
+}
+
+.checkbox-label-wrap input[type='checkbox']:checked::before {
+  transform: rotate(45deg) scale(1);
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  opacity: 0.9;
+}
+
+.btn-icon svg {
+  display: block;
+}
+
+.header-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.header-actions .file-btn {
+  min-width: 64px;
+}
+
+.file-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #dbeeff;
+  border: 1px solid rgba(200, 220, 246, 0.18);
+  padding: 8px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+}
+
+.file-btn:hover {
+  background: linear-gradient(135deg, rgba(109, 174, 233, 0.84), rgba(141, 154, 226, 0.8));
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(73, 132, 188, 0.16);
+}
+
+@media (max-width: 640px) {
+  .header-actions {
+    gap: 6px;
+  }
+
+  .header-actions .file-btn {
+    width: 42px;
+    min-width: 42px;
+    padding: 8px;
+    gap: 0;
+    font-size: 0;
+  }
+
+  .header-actions .btn-icon {
+    opacity: 1;
+  }
+
+  .header-actions .btn-icon svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .tool-tabs-bar {
+    gap: 2px;
+    padding: 4px;
+  }
+
+  .tool-tabs .view-tab {
+    padding: 8px 7px;
+    font-size: 14px;
+  }
+  .view-tab .tab-label-full {
+    display: none;
+  }
+  .view-tab .tab-label-short {
+    display: inline;
+  }
+
+  .section {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --sticky-header-offset: 10px;
+  }
+  body {
+    padding-top: 0;
+  }
+  .container {
+    width: calc(100vw - 32px);
+    padding: 28px 16px;
+  }
+  .result-value {
+    font-size: 23px;
+  }
+  .result-display {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px 14px;
+    padding: 9px 14px;
+    border-radius: 22px;
+    min-height: 50px;
+  }
+  .equipment-result-card {
+    width: auto;
+    max-width: 100%;
+    flex: 0 1 auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 18px 28px;
+    padding: 18px 26px;
+    border-radius: 22px;
+    min-height: 80px;
+  }
+  .combat-power-summary {
+    width: min(100%, var(--summary-max-width));
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px;
+    min-height: 66px;
+  }
+  .combat-power-summary .result-item {
+    min-width: 0;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .combat-power-summary .result-label {
+    flex: 0 0 auto;
+  }
+  .combat-power-summary .result-value {
+    flex: 0 1 auto;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: keep-all;
+    font-size: 38px;
+    line-height: 1.05;
+  }
+  .character-data-summary {
+    padding: 12px;
+  }
+  .result-item,
+  .equipment-result-row {
+    width: auto;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  .result-label,
+  .equipment-result-label {
+    font-size: 20px;
+    margin-right: 0;
+  }
+  .file-btn {
+    flex: none;
+  }
+  .job-option-list {
+    max-height: 248px;
+  }
+  .tool-tabs {
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 12px;
+  }
+  .tool-tabs-bar {
+    flex: 0 0 auto;
+  }
+  .tool-tabs .view-tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+  .equipment-efficiency-toolbar {
+    align-items: center;
+  }
+  .equipment-efficiency-mode-group {
+    width: max-content;
+    max-width: 100%;
+  }
+  .equipment-efficiency-custom-panel summary {
+    margin-left: auto;
+  }
+  .equipment-efficiency-group summary {
+    grid-template-columns: 78px max-content minmax(0, 1fr);
+    gap: 4px 10px;
+  }
+  .equipment-efficiency-table.show-actual-gain .equipment-efficiency-group summary,
+  .equipment-efficiency-table.show-combat-gain .equipment-efficiency-group summary {
+    grid-template-columns: 78px max-content minmax(0, 1fr);
+  }
+  .equipment-efficiency-table.show-actual-gain.show-combat-gain
+    .equipment-efficiency-group
+    summary {
+    grid-template-columns: 78px max-content minmax(0, 1fr);
+  }
+  .equipment-efficiency-metric-picker {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .equipment-efficiency-unit-control {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .equipment-equivalence-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding-inline: 8px;
+  }
+  .equipment-efficiency-table.show-actual-gain .equipment-equivalence-grid,
+  .equipment-efficiency-table.show-combat-gain .equipment-equivalence-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .equipment-equivalence-row {
+    grid-template-columns: minmax(0, 1fr) minmax(56px, auto);
+    gap: 6px;
+    align-items: center;
+    min-width: 0;
+    padding: 6px 8px;
+  }
+  .equipment-equivalence-row:not(.has-actual):not(.has-combat) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .equipment-equivalence-row.has-actual.has-combat {
+    grid-template-columns: minmax(0, 1fr) minmax(106px, auto);
+  }
+  .equipment-equivalence-name,
+  .equipment-equivalence-value {
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .equipment-equivalence-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+  }
+  .equipment-equivalence-values {
+    justify-self: stretch;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0 8px;
+    align-items: baseline;
+  }
+  .equipment-equivalence-row.has-actual.has-combat .equipment-equivalence-values {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .equipment-equivalence-value {
+    font-size: 14px;
+    text-align: right;
+  }
+  /* 同時顯示實戰/戰鬥力時先保留 2 欄，更窄手機版才改單欄。 */
+  .equipment-efficiency-table.show-actual-gain.show-combat-gain .equipment-equivalence-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .section {
+    grid-template-columns: 1fr;
+  }
+  .equipment-grid .section {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .api-controls {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .equipment-grid .section {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  /* 極窄版才折到第二列：第一列保留單位/名稱/加號，第二列左實戰、右戰鬥力。 */
+  .equipment-efficiency-table.show-actual-gain.show-combat-gain
+    .equipment-efficiency-group
+    summary {
+    grid-template-columns: 78px max-content minmax(0, 1fr);
+    row-gap: 4px;
+  }
+
+  .show-actual-gain.show-combat-gain .equipment-efficiency-metric-picker {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .show-actual-gain.show-combat-gain .equipment-efficiency-unit-control {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .equipment-efficiency-table.show-actual-gain.show-combat-gain .equipment-equivalence-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 421px) and (max-width: 960px) {
+  .equipment-grid {
+    --equipment-input-width: 86px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(8px, 1.2vw, 12px);
+  }
+
+  .equipment-grid .section {
+    padding: clamp(10px, 1.4vw, 14px);
+  }
+
+  .equipment-grid .section > .input-group {
+    grid-template-columns: minmax(64px, 1fr) minmax(78px, var(--equipment-input-width));
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+  }
+
+  .equipment-grid .section > .input-group label {
+    font-size: 14px;
+    line-height: 1.25;
+    white-space: normal;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  .equipment-grid .section > .input-group input,
+  .equipment-grid .section > .input-group select {
+    justify-self: end;
+    max-width: var(--equipment-input-width);
+    min-height: 38px;
+    padding-left: 20px;
+    padding-right: 20px;
+    text-align: center;
+  }
+
+  .equipment-grid .section > .input-group.has-input-unit .equipment-input-wrap {
+    max-width: var(--equipment-input-width);
+  }
+
+  .equipment-grid .section > .input-group.has-input-unit .equipment-input-wrap input {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (max-width: 720px) {
+  .equipment-grid .section > .input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 7px;
+    width: 100%;
+  }
+
+  .equipment-grid .section > .input-group label {
+    margin-bottom: 0;
+    align-self: flex-start;
+  }
+
+  .equipment-grid .section > .input-group input,
+  .equipment-grid .section > .input-group select {
+    justify-self: stretch;
+    width: 100%;
+    max-width: none;
+    text-align: center;
+    min-height: 38px;
+  }
+
+  .equipment-grid .section > .input-group.has-input-unit .equipment-input-wrap {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+input[type='number'],
+.equipment-grid .section > .input-group input[type='number'] {
+  text-align: center;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+#percentMain,
+#skillPercentMain,
+#percentSub,
+#skillPercentSub,
+#percentSubtwo,
+#skillPercentSubtwo,
+#percentAtk,
+#skillPercentAtk,
+#dmg,
+#skillDmg,
+#bossDmg,
+#skillBossDmg,
+#critDmg,
+#skillCritDmg,
+#famFinal,
+#adjEventBossDmg,
+#adjMentorBossDmg,
+#adjZeroWeaponFlameBossDmg,
+#eqOldPercentMain,
+#eqOldPercentSub,
+#eqOldPercentSubtwo,
+#eqOldAllStatPercent,
+#eqOldPercentAtk,
+#eqOldDmg,
+#eqOldBossDmg,
+#eqOldCritDmg,
+#eqOldFamFinal,
+#eqOldIgnoreDefense,
+#eqNewPercentMain,
+#eqNewPercentSub,
+#eqNewPercentSubtwo,
+#eqNewAllStatPercent,
+#eqNewPercentAtk,
+#eqNewDmg,
+#eqNewBossDmg,
+#eqNewCritDmg,
+#eqNewFamFinal,
+#eqNewIgnoreDefense,
+#effPercentMain,
+#effPercentSub,
+#effPercentSubtwo,
+#effPercentAtk,
+#effDmg,
+#effBossDmg,
+#effCritDmg,
+#effFamFinal,
+#effIgnoreDefense,
+#effMonsterDefense {
+  padding-right: 30px;
+  padding-left: 30px;
+  background-image: var(--percent-suffix-icon);
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 18px 18px;
+  transition-property: border-color, background-color, box-shadow, color;
+}
+
+#calculatorMode #percentMain,
+#calculatorMode #skillPercentMain,
+#calculatorMode #percentSub,
+#calculatorMode #skillPercentSub,
+#calculatorMode #percentSubtwo,
+#calculatorMode #skillPercentSubtwo,
+#calculatorMode #percentAtk,
+#calculatorMode #skillPercentAtk,
+#calculatorMode #dmg,
+#calculatorMode #skillDmg,
+#calculatorMode #bossDmg,
+#calculatorMode #skillBossDmg,
+#calculatorMode #critDmg,
+#calculatorMode #skillCritDmg,
+#calculatorMode #famFinal,
+#calculatorMode #adjEventBossDmg,
+#calculatorMode #adjMentorBossDmg,
+#calculatorMode #adjZeroWeaponFlameBossDmg {
+  padding-left: 24px;
+  padding-right: 24px;
+  background-position: right 6px center;
+}

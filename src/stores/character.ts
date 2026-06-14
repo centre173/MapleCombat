@@ -1,0 +1,370 @@
+import { defineStore } from 'pinia'
+import { computed, reactive, ref } from 'vue'
+import { fieldDefs, fieldDefById } from '@/constants/fields'
+import { hydrateField, persistField, runStorageMigrations, getStoredString } from './persist'
+import { useBuffsStore } from './buffs'
+import { getDefaultJobByCategory, getJobByName, getJobStatLabelsByName } from '@/data/jobs'
+import { weaponDatabase, zeroWeaponDatabase } from '@/data/weapons'
+import { parseFamSources } from '@/core/familiar'
+import type { BuffDelta, FieldValues, JobCategory, PowerResult, WeaponSetKey } from '@/core/types'
+import {
+  calculatePower,
+  powerValue,
+  resolveCombatFormulaInputs,
+  type CombatPowerContext,
+} from '@/core/combatPower'
+import { calculateEquipmentOutput, resolveActualFormulaInputs } from '@/core/actualDamage'
+import { getEquipmentActualDelta, getEquipmentDelta } from '@/core/equipmentDelta'
+import {
+  calculateWeaponCorrectionValue,
+  resolveWeaponDataKey,
+  runWeaponCorrection,
+  type WeaponCorrectionInput,
+} from '@/core/weaponCorrection'
+import {
+  getCombatBuffDelta,
+  getEffBuffDelta,
+  getEffBuffIgnoreFactor,
+  type BuffComputeContext,
+} from '@/core/buffs/delta'
+import { normalizeSavedData, type SaveDataV1 } from '@/services/saveData'
+
+// 戰鬥力資料 ↔ 實戰資料 欄位對應
+const combatToEffFieldMap: Record<string, string> = {
+  baseMain: 'effBaseMain',
+  percentMain: 'effPercentMain',
+  noApplyMain: 'effNoApplyMain',
+  baseSub: 'effBaseSub',
+  percentSub: 'effPercentSub',
+  noApplySub: 'effNoApplySub',
+  includeSecondSub: 'effIncludeSecondSub',
+  baseSubtwo: 'effBaseSubtwo',
+  percentSubtwo: 'effPercentSubtwo',
+  noApplySubtwo: 'effNoApplySubtwo',
+  atk: 'effAtk',
+  percentAtk: 'effPercentAtk',
+  noApplyAtk: 'effNoApplyAtk',
+  dmg: 'effDmg',
+  bossDmg: 'effBossDmg',
+  critDmg: 'effCritDmg',
+  famFinal: 'effFamFinal',
+  adjDAHP: 'effBaseHP',
+}
+
+export const useCharacterStore = defineStore('character', () => {
+  const buffs = useBuffsStore()
+
+  runStorageMigrations()
+
+  // ── 欄位狀態（值保持原始字串：空字串 ≠ 0 的語意） ──
+  const fields = reactive<Record<string, string | boolean>>({})
+  fieldDefs.forEach((def) => {
+    fields[def.id] = hydrateField(def)
+  })
+
+  // ── 職業狀態 ──
+  const savedJobName = getStoredString('selectedJobName', '')
+  const savedJobCategory = getStoredString('selectedJob', 'normal')
+  const startupJob = getJobByName(savedJobName) || getDefaultJobByCategory(savedJobCategory)
+  const selectedJobName = ref(startupJob.name)
+  const selectedJob = ref<JobCategory>(startupJob.category)
+  const effSelectedJob = ref<JobCategory>(startupJob.category)
+
+  const isZeroJob = computed(() => selectedJobName.value === '神之子')
+  const isRuinFinalJob = computed(
+    () => selectedJob.value === 'da' || selectedJobName.value === '惡魔殺手',
+  )
+  const includeSecondSub = computed(
+    () => selectedJob.value === 'xenon' || selectedJob.value === 'dual',
+  )
+  const statLabels = computed(() => getJobStatLabelsByName(selectedJobName.value))
+
+  const str = (id: string) => String(fields[id] ?? '')
+  const num = (id: string) => +String(fields[id] ?? '') || 0
+
+  // ── 武器攻擊校正 ──
+  const weaponCorrectionInput = computed<WeaponCorrectionInput>(() => ({
+    weaponSet: str('weaponSet'),
+    flameLevel: parseInt(str('flameLevel')) || 0,
+    scrollAtk: parseInt(str('scrollAtk')) || 0,
+    starCount: parseInt(str('starCount')) || 0,
+    currentWeaponAtk: parseInt(str('currentWeaponAtk')) || 0,
+    jobCategory: selectedJob.value,
+    isZeroJob: isZeroJob.value,
+  }))
+  const weaponCorrection = computed(() => runWeaponCorrection(weaponCorrectionInput.value))
+  const weaponSetData = computed(() => {
+    const db = isZeroJob.value ? zeroWeaponDatabase : weaponDatabase
+    return db[(db[str('weaponSet') as WeaponSetKey] ? str('weaponSet') : 'fortune') as WeaponSetKey]
+  })
+
+  // ── 計算輸入（欄位數值 + 衍生的 adjWeaponAtk/baseAtk） ──
+  const numericFields = computed<FieldValues>(() => {
+    const out: FieldValues = {}
+    for (const def of fieldDefs) {
+      if (def.kind === 'checkbox') continue
+      out[def.id] = +String(fields[def.id] ?? '') || 0
+    }
+    out.adjWeaponAtk = weaponCorrection.value.correction
+    out.baseAtk = weaponCorrection.value.baseAtk
+    return out
+  })
+
+  function combatCtx(useBuff: boolean): CombatPowerContext {
+    const wIn = weaponCorrectionInput.value
+    const resolvedKey = resolveWeaponDataKey(wIn)
+    return {
+      jobCategory: selectedJob.value,
+      jobName: selectedJobName.value,
+      weaponSet: str('weaponSet'),
+      genesisFinalChecked: fields.genesisFinalCheck === true,
+      useBuff,
+      overseasGenesisAtkDelta:
+        calculateWeaponCorrectionValue('genesis', wIn) -
+        calculateWeaponCorrectionValue(resolvedKey, wIn),
+      xenonPowerCoefficientRaw: str('adjXenonPowerCoefficient'),
+      daPowerCoefficientRaw: str('adjDAPowerCoefficient'),
+      famFinalSources: parseFamSources(str('famFinalSources')),
+    }
+  }
+
+  // 實戰公式 context：帶入實戰萌獸終傷逐條來源（空時退回 overseasFamMult）。
+  function effCtx(ignoreFactor: number) {
+    return {
+      effJob: effSelectedJob.value,
+      ignoreFactor,
+      effFamFinalSources: parseFamSources(str('effFamFinalSources')),
+    }
+  }
+
+  function buffCtx(mode: 'combat' | 'eff'): BuffComputeContext {
+    return {
+      job: mode === 'combat' ? selectedJob.value : effSelectedJob.value,
+      statLabels: statLabels.value,
+      currentWeaponAtk: num('currentWeaponAtk'),
+      soulOrb: buffs.soulOrb,
+    }
+  }
+
+  // ── Buff delta ──
+  const combatBuffDelta = computed<BuffDelta>(() =>
+    getCombatBuffDelta(buffs.table, buffs.state, buffCtx('combat')),
+  )
+  const effBuffDelta = computed<BuffDelta>(() =>
+    getEffBuffDelta(buffs.table, buffs.state, buffCtx('eff')),
+  )
+  const effIgnoreFactor = computed(() =>
+    getEffBuffIgnoreFactor(buffs.table, buffs.state, buffs.soulOrb),
+  )
+
+  // ── 戰鬥力 / 實戰輸出 ──
+  function computePower(useBuff: boolean, delta: FieldValues = {}): PowerResult {
+    return calculatePower(
+      numericFields.value,
+      combatCtx(useBuff),
+      delta,
+      useBuff ? combatBuffDelta.value : {},
+    )
+  }
+
+  function computeEffOutput(useBuff: boolean, delta: FieldValues = {}): number {
+    return calculateEquipmentOutput(
+      numericFields.value,
+      effCtx(useBuff ? effIgnoreFactor.value : 1),
+      delta,
+      useBuff ? effBuffDelta.value : {},
+    )
+  }
+
+  const powerNoBuff = computed(() => computePower(false))
+  const powerWithBuff = computed(() => computePower(true))
+  const effOutputNoBuff = computed(() => computeEffOutput(false))
+  const effOutputWithBuff = computed(() => computeEffOutput(true))
+
+  // ── 數值預覽：直接取正式公式採用的校正後中間值 ──
+  const combatPreviewNoBuff = computed(() =>
+    resolveCombatFormulaInputs(numericFields.value, combatCtx(false)),
+  )
+  const combatPreviewWithBuff = computed(() =>
+    resolveCombatFormulaInputs(numericFields.value, combatCtx(true), {}, combatBuffDelta.value),
+  )
+  const effPreviewNoBuff = computed(() => resolveActualFormulaInputs(numericFields.value, effCtx(1)))
+  const effPreviewWithBuff = computed(() =>
+    resolveActualFormulaInputs(
+      numericFields.value,
+      effCtx(effIgnoreFactor.value),
+      {},
+      effBuffDelta.value,
+    ),
+  )
+
+  // ── 裝備變更 ──
+  const equipmentDelta = computed(() => getEquipmentDelta(numericFields.value, selectedJob.value))
+  const equipmentChangedPower = computed(() => computePower(false, equipmentDelta.value))
+  const equipmentActualGain = computed<number | null>(() => {
+    const baseOutput = computeEffOutput(true)
+    if (!baseOutput || baseOutput <= 0 || !isFinite(baseOutput)) return null
+    const changedOutput = computeEffOutput(
+      true,
+      getEquipmentActualDelta(numericFields.value, selectedJob.value),
+    )
+    if (!isFinite(changedOutput)) return null
+    return ((changedOutput - baseOutput) / baseOutput) * 100
+  })
+
+  // ── 欄位操作 ──
+  function setField(id: string, value: string | boolean): void {
+    const def = fieldDefById[id]
+    if (!def) return
+    fields[id] = value
+    persistField(id, value)
+    if (id === 'weaponSet') handleWeaponChange(true)
+  }
+
+  /** weaponSet 連動：回填卷軸/星力預設、同步創世終傷勾選 */
+  function handleWeaponChange(shouldResetDefaults: boolean): void {
+    const db = isZeroJob.value ? zeroWeaponDatabase : weaponDatabase
+    let setKey = str('weaponSet')
+    if (!db[setKey as WeaponSetKey]) {
+      setKey = 'fortune'
+      fields.weaponSet = setKey
+      persistField('weaponSet', setKey)
+    }
+    const setData = db[setKey as WeaponSetKey]
+    if (shouldResetDefaults) {
+      fields.scrollAtk = String(setData.defaultScroll)
+      persistField('scrollAtk', fields.scrollAtk)
+      if (setData.hideSubFields) {
+        fields.starCount = '22'
+        persistField('starCount', '22')
+      }
+    }
+    syncGenesisFinalFromWeaponSet()
+  }
+
+  function syncGenesisFinalFromWeaponSet(): void {
+    const setKey = str('weaponSet')
+    const shouldApply = setKey === 'fortune' || setKey === 'genesis'
+    fields.genesisFinalCheck = shouldApply
+    persistField('genesisFinalCheck', shouldApply)
+  }
+
+  // ── 職業切換 ──
+  function selectJobByName(jobName: string, options: { category?: string } = {}): void {
+    const job = getJobByName(jobName) || getDefaultJobByCategory(options.category || 'normal')
+    selectedJob.value = job.category
+    selectedJobName.value = job.name
+    effSelectedJob.value = job.category
+    localStorage.setItem('selectedJob', job.category)
+    localStorage.setItem('selectedJobName', job.name)
+    localStorage.setItem('effSelectedJob', job.category)
+    syncGenesisFinalFromWeaponSet()
+  }
+
+  // ── 跨模式複製 ──
+  function copyMappedFields(fieldMap: Record<string, string>): void {
+    Object.entries(fieldMap).forEach(([srcId, destId]) => {
+      if (!(srcId in fields) || !(destId in fields)) return
+      fields[destId] = fields[srcId]
+      persistField(destId, fields[destId])
+    })
+  }
+
+  function copyCombatDataToEff(): void {
+    copyMappedFields(combatToEffFieldMap)
+  }
+
+  function copyEffDataToCombat(): void {
+    const reversed = Object.fromEntries(
+      Object.entries(combatToEffFieldMap).map(([combatId, effId]) => [effId, combatId]),
+    )
+    copyMappedFields(reversed)
+  }
+
+  // ── 匯出/匯入 ──
+  function collectSaveData(): SaveDataV1 {
+    const values: Record<string, unknown> = {}
+    fieldDefs.forEach((def) => {
+      values[def.id] = fields[def.id]
+    })
+    return {
+      app: 'maplecombat',
+      version: 1,
+      savedAt: new Date().toISOString(),
+      selectedJob: selectedJob.value,
+      selectedJobName: selectedJobName.value,
+      effSelectedJob: effSelectedJob.value,
+      values,
+      buffState: buffs.collectState(),
+    }
+  }
+
+  function applySaveData(raw: unknown): void {
+    const saveData = normalizeSavedData(raw)
+
+    fieldDefs.forEach((def) => {
+      if (!Object.prototype.hasOwnProperty.call(saveData.values, def.id)) return
+      const value = saveData.values[def.id]
+      if (def.kind === 'checkbox') {
+        const checked = value === true || value === 'true'
+        fields[def.id] = checked
+        persistField(def.id, checked)
+      } else if (def.kind === 'select') {
+        if (!def.options || !def.options.includes(String(value))) return
+        fields[def.id] = String(value)
+        persistField(def.id, String(value))
+      } else {
+        fields[def.id] = String(value ?? '')
+        persistField(def.id, fields[def.id])
+      }
+    })
+
+    const job = saveData.selectedJob || 'normal'
+    const savedJobByName = getJobByName(saveData.selectedJobName)
+    const importJob = savedJobByName || getDefaultJobByCategory(job)
+    selectJobByName(importJob.name)
+
+    if (saveData.buffState) {
+      buffs.applyState(saveData.buffState)
+    }
+
+    handleWeaponChange(false)
+  }
+
+  return {
+    fields,
+    selectedJob,
+    selectedJobName,
+    effSelectedJob,
+    isZeroJob,
+    isRuinFinalJob,
+    includeSecondSub,
+    statLabels,
+    weaponCorrection,
+    weaponSetData,
+    numericFields,
+    combatBuffDelta,
+    effBuffDelta,
+    effIgnoreFactor,
+    powerNoBuff,
+    powerWithBuff,
+    effOutputNoBuff,
+    effOutputWithBuff,
+    combatPreviewNoBuff,
+    combatPreviewWithBuff,
+    effPreviewNoBuff,
+    effPreviewWithBuff,
+    equipmentDelta,
+    equipmentChangedPower,
+    equipmentActualGain,
+    computePower,
+    computeEffOutput,
+    setField,
+    selectJobByName,
+    copyCombatDataToEff,
+    copyEffDataToCombat,
+    collectSaveData,
+    applySaveData,
+    powerValue,
+  }
+})

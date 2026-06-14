@@ -1,0 +1,110 @@
+/* Base: fonts, variables, app-loading guard, and global document setup. */
+
+body.app-loading #dynamicFieldsRow,
+body.app-loading #dynamicStarRow {
+  display: none;
+}
+
+body.app-loading *,
+body.app-loading *::before,
+body.app-loading *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+body.app-loading .container {
+  visibility: hidden;
+}
+
+:root {
+  --bg-color: #182135;
+  --card-bg: rgba(215, 225, 235, 0.03);
+  --section-bg: rgba(46, 62, 92, 0.305);
+  /* === 面板 surface 單一來源（所有卡片/面板共用，主題覆寫 --section-bg 即可全 App 跟上）===
+     平面板：var(--surface-overlay), var(--section-bg)
+     結果卡：var(--surface-hero-glow), var(--surface-overlay), var(--section-bg) */
+  --surface-overlay: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  --surface-hero-glow: radial-gradient(circle at 88% 26%, rgba(150, 195, 240, 0.12), transparent 40%);
+  --text-color: #edf5ff;
+  --muted-color: #c2cfe1;
+  --accent-color: #6daee9;
+  --accent-strong: #3f8fd3;
+  --accent-soft: rgba(109, 174, 233, 0.2);
+  --violet-color: #9c8ae6;
+  --accent-violet: rgba(210, 230, 255, 0.65);
+  --warm-color: #ffd6a3;
+  --warm-soft: rgba(255, 214, 163, 0.18);
+  --input-bg: rgba(42, 56, 84, 0.3);
+  --border-color: rgba(210, 226, 248, 0.22);
+  --result-color: #8ed7ff;
+  --header-bg: rgba(34, 47, 70, 0.66);
+  --disabled-bg: rgba(64, 78, 102, 0.4);
+  --glass-shadow: 0 24px 70px rgba(4, 11, 24, 0.36);
+
+  /* Glass / focus / icon tokens */
+  --glass-highlight: rgba(255, 255, 255, 0.09);
+  --focus-ring: 0 0 0 1px rgba(255, 255, 255, 0.12);
+  --percent-suffix-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Ctext x='9' y='13' text-anchor='middle' font-family='Arial, sans-serif' font-size='13' font-weight='700' fill='%23c2cfe1'%3E%25%3C/text%3E%3C/svg%3E");
+
+  /* Design tokens */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  --fs-sm: 20px;
+  --fs-base: 14px;
+  --fs-md: 15px;
+  --fs-lg: 17px;
+  --fs-2xl: 26px;
+  --fs-3xl: 36px;
+
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --page-gutter: clamp(16px, 2vw, 28px);
+  --page-max-width: 1300px;
+  --calc-side-min-width: 340px;
+  --calc-side-max-width: 490px;
+  /* 連續函數，無 1120 斷點跳動 → main 寬度單調、不反覆切換版面。
+               比例提高到 40%，寬螢幕時右側增益欄更寬、與左側更平衡；窄端仍維持 8 格 */
+  --calc-side-width: clamp(var(--calc-side-min-width), 40%, var(--calc-side-max-width));
+  --calc-layout-gap: var(--space-5);
+  --calc-main-width: calc(100% - var(--calc-side-width) - var(--calc-layout-gap));
+  --summary-max-width: 660px;
+  --sticky-header-offset: 12px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', 'SF Pro Display', 'Microsoft JhengHei', sans-serif;
+  background-color: #1b2542;
+  background-image:
+    radial-gradient(ellipse 70% 54% at 50% 40%, rgba(11, 16, 36, 0), transparent 0%),
+    radial-gradient(circle at 12% 8%, rgba(126, 174, 236, 0.3), transparent 90%),
+    radial-gradient(circle at 86% 6%, rgba(156, 138, 228, 0.25), transparent 90%),
+    linear-gradient(180deg, #ea9999 0%, #32466f 100%),
+    url('../assets/images/maple-sky-village-bg.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  background-blend-mode: normal, screen, screen, multiply, normal;
+  background-attachment: fixed;
+  color: var(--text-color);
+  margin: 0;
+  padding: 0 var(--page-gutter) 50px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}

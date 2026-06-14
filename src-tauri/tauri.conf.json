@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "新楓之谷戰鬥力計算機",
+  "version": "1.0.0",
+  "identifier": "tw.maplecombat.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "戰鬥力計算機",
+        "width": 670,
+        "height": 820,
+        "minWidth": 580,
+        "minHeight": 520,
+        "maxWidth": 980,
+        "maxHeight": 960,
+        "center": true,
+        "preventOverflow": true,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": ["icons/icon.png", "icons/icon.ico"],
+    "windows": {
+      "webviewInstallMode": { "type": "downloadBootstrapper" },
+      "nsis": {
+        "languages": ["TradChinese", "English"]
+      }
+    }
+  }
+}

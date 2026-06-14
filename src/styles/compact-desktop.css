@@ -1,0 +1,2167 @@
+/* ===================================================================
+   桌面緊湊版（Tauri）— 僅在 :root[data-density='compact'] 下生效。
+   必須在 main.ts 最後載入：依賴 source order 壓過 theme-web/density。
+
+   設計原則：高資訊密度的「遊戲工具」，不是後台管理介面。
+   視覺語言完全沿用網頁版粉彩玻璃（theme-web.css）：漸層、blur、
+   發光數值、柔和圓角全部保留；本檔只做「幾何壓縮」——
+   高度、間距、字級、欄位排法，不重定義配色。
+   主題切換：預設 light = 粉彩玻璃；dark = 深藍玻璃（只換背景變數）。
+   =================================================================== */
+
+/* ===== 1. 密度與幾何 Token ===== */
+:root[data-density='compact'] {
+  /* 密度再壓縮（覆寫 density.css 的 compact 值） */
+  --density-space-1: 2px;
+  --density-space-2: 5px;
+  --density-space-3: 8px;
+  --density-control-h: 23px;
+  --density-fs-base: 12px;
+  --density-fs-small: 11px;
+  --density-fs-title: 13px;
+  --compact-toolbar-h: 32px;
+
+  /* 間距/字級縮小；圓角縮小但保持柔和（不做方框） */
+  --space-2: 5px;
+  --space-3: 8px;
+  --space-4: 10px;
+  --space-5: 12px;
+  --page-gutter: 8px;
+  --sticky-header-offset: 0px;
+  --calc-layout-gap: 8px;
+  --radius-sm: 7px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+  --fs-sm: 12px;
+  --fs-base: 12px;
+  --fs-md: 12px;
+  --fs-lg: 13px;
+  --fs-2xl: 18px;
+  --fs-3xl: 22px;
+
+  /* 頂部共用霧面底層：工具列、結果列、資料切換區使用同一段色階。 */
+  --compact-bar-bg: rgba(104, 118, 160, 0.34);
+  --compact-top-shade: rgba(47, 60, 101, 0.46);
+  --compact-top-mid: rgba(94, 112, 160, 0.3);
+  --compact-tool-surface-bg:
+    radial-gradient(circle at 88% 8%, rgba(132, 176, 226, 0.13), transparent 36%),
+    linear-gradient(155deg, #596086, #50567d);
+
+  /* % 後綴圖示縮小：不可比輸入數字（12px）大 */
+  --percent-suffix-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 13 13'%3E%3Ctext x='6.5' y='10' text-anchor='middle' font-family='Arial, sans-serif' font-size='10' font-weight='700' fill='%23d4deec'%3E%25%3C/text%3E%3C/svg%3E");
+}
+
+/* 只在內容確實超出視窗時顯示縱向捲軸；避免短頁面仍保留 8px 深色軌道。 */
+html:root[data-density='compact'] {
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* 後備底色貼近背景圖色調（body 固定背景覆蓋不到的極端情況才會露出） */
+  background-color: #1b2542;
+  background-image:
+    radial-gradient(ellipse 70% 54% at 50% 40%, rgba(11, 16, 36, 0), transparent 0%),
+    radial-gradient(circle at 12% 8%, rgba(126, 174, 236, 0.3), transparent 90%),
+    radial-gradient(circle at 86% 6%, rgba(156, 138, 228, 0.25), transparent 90%),
+    linear-gradient(180deg, #ea9999 0%, #32466f 100%),
+    url('../assets/images/maple-sky-village-bg.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  background-blend-mode: normal, screen, screen, multiply, normal;
+  /* 注意：勿加 background-attachment: fixed。useAutoZoom 會對 html 設 zoom，
+     fixed 背景在 zoom>1（寬視窗）下會算錯尺寸無法 cover，露出後備底色變黑。 */
+}
+
+/* 細捲軸（玻璃感） */
+:root[data-density='compact'] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+:root[data-density='compact'] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:root[data-density='compact'] ::-webkit-scrollbar-thumb {
+  background: rgba(220, 232, 255, 0.28);
+  border-radius: 999px;
+}
+
+:root[data-density='compact'] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(220, 232, 255, 0.42);
+}
+
+/* ===== 2. 深藍玻璃主題（◐ 切換）：只換背景與玻璃底色，效果不變 ===== */
+:root[data-density='compact'][data-theme='dark'] {
+  --bg-color: #242c4e;
+  --compact-bar-bg: rgba(26, 32, 60, 0.55);
+  --compact-top-shade: rgba(10, 14, 34, 0.5);
+  --compact-top-mid: rgba(31, 39, 75, 0.38);
+  --web-glass: rgba(56, 64, 102, 0.56);
+  --web-glass-strong: rgba(48, 56, 94, 0.66);
+  --web-glass-soft: rgba(84, 92, 132, 0.36);
+  --compact-tool-surface-bg:
+    radial-gradient(circle at 88% 8%, rgba(117, 151, 204, 0.1), transparent 36%),
+    linear-gradient(155deg, #30385d, #252d4d);
+  --card-bg: var(--web-glass);
+  --section-bg: var(--web-glass);
+  --header-bg: rgba(46, 54, 92, 0.5);
+  --input-bg: rgba(40, 48, 80, 0.58);
+  --disabled-bg: rgba(58, 65, 100, 0.46);
+}
+
+html:root[data-density='compact'][data-theme='dark'] {
+  background-color: #242c4e;
+  background-image:
+    linear-gradient(180deg, rgba(24, 30, 58, 0.8), rgba(28, 26, 50, 0.88)),
+    radial-gradient(circle at 76% 18%, rgba(160, 120, 200, 0.18), transparent 30%),
+    url('../assets/images/maple-sky-village-bg.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  background-blend-mode: multiply, screen, normal;
+  /* 同上：勿加 background-attachment: fixed（zoom 下會破壞 cover）。 */
+}
+
+/* ===== 3. 版面骨架：去掉外層容器這一層玻璃（單層卡片直接放在背景上） ===== */
+:root[data-density='compact'] body {
+  padding: 0 var(--page-gutter) 12px;
+  background: transparent;
+}
+
+/* Vue 根節點是 body 的 flex item；未鎖寬時會依目前分頁內容 shrink-to-fit，
+   造成切換分頁或展開控制項時整個 Header/內容一起改變寬度。 */
+:root[data-density='compact'] #app {
+  align-self: stretch;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-width: 0;
+}
+
+/* 頂部不再疊固定模糊遮罩；避免與 sticky Header / 結果卡重複合成。 */
+:root[data-density='compact'] body::after {
+  display: none;
+}
+
+:root[data-density='compact'] .container {
+  /* 壓掉 calculator.css 的 <=768px width: calc(100vw - 32px)，
+     佈局視口由 useAutoZoom 以 635px 設計寬縮放：容器恆滿寬，
+     三分頁同寬、bar 滿版延展、無置中斷層 */
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  margin-top: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+:root[data-density='compact'] .container::before {
+  display: none;
+}
+
+:root[data-density='compact'] .section {
+  padding: 7px 10px 9px;
+  column-gap: 8px;
+  row-gap: 5px;
+}
+
+/* 減法精修：核心結果維持較強玻璃；一般資料卡降低陰影與霧化層數。 */
+:root[data-density='compact'] .section,
+:root[data-density='compact'] .buff-panel,
+:root[data-density='compact'] .character-data-summary {
+  border-color: rgba(220, 232, 255, 0.16);
+  box-shadow:
+    0 8px 22px rgba(48, 45, 77, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(9px) saturate(1.02);
+}
+
+:root[data-density='compact'] .section:hover {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.035)),
+    var(--web-glass);
+  border-color: rgba(220, 232, 255, 0.2);
+  box-shadow:
+    0 9px 24px rgba(48, 45, 77, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.11);
+}
+
+:root[data-density='compact'] .section-title {
+  font-size: var(--density-fs-title);
+  margin-bottom: 2px;
+  gap: 5px;
+}
+
+/* 一般章節共用同一顆星：固定尺寸與基線，避免各元件繼承不同字級。 */
+:root[data-density='compact'] .section-title::before,
+:root[data-density='compact'] .buff-head-title::before,
+:root[data-density='compact'] .tower-ring-title::before {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 13px;
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 13px;
+  vertical-align: middle;
+}
+
+/* 頂部摘要卡保留較小層級，但左右結果卡使用完全相同的星星規格。 */
+:root[data-density='compact'] .compact-result-bar .result-label::before,
+:root[data-density='compact'] .equipment-result-label::before {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+  font-size: 12px;
+  line-height: 12px;
+  transform: translateY(-1px);
+  vertical-align: middle;
+}
+
+/* ===== 4. 緊湊工具列（取代網頁大頁首；玻璃條 + 膠囊分頁） ===== */
+:root[data-density='compact'] .compact-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 720;
+  align-self: stretch;
+  width: calc(100% + 2 * var(--page-gutter));
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--compact-toolbar-h);
+  margin: 0 calc(-1 * var(--page-gutter));
+  padding: 0 var(--page-gutter);
+}
+
+/* Header 自己持有單一實底，不依賴背景模糊或下方內容合成。 */
+:root[data-density='compact'] .compact-toolbar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, #66739b, #59658d);
+  box-shadow: 0 1px 0 rgba(220, 232, 255, 0.14);
+}
+
+:root[data-density='compact'][data-theme='dark'] .compact-toolbar::before {
+  background: linear-gradient(180deg, #313b61, #283253);
+}
+
+:root[data-density='compact'] .ct-tabs {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+:root[data-density='compact'] .ct-tab {
+  padding: 3px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: rgba(235, 242, 255, 0.76);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+:root[data-density='compact'] .ct-tab:not(.active):hover {
+  background: rgba(212, 232, 255, 0.12);
+  color: #ffffff;
+}
+
+:root[data-density='compact'] .ct-tab.active {
+  color: #ffffff;
+  background:
+    radial-gradient(circle at 82% 22%, rgba(255, 255, 255, 0.22), transparent 42%),
+    linear-gradient(135deg, rgba(120, 183, 235, 0.96), rgba(126, 150, 218, 0.9));
+  border-color: rgba(214, 232, 255, 0.3);
+  box-shadow:
+    0 4px 12px rgba(67, 109, 169, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  text-shadow: 0 2px 4px rgba(42, 67, 115, 0.32);
+}
+
+:root[data-density='compact'] .ct-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+:root[data-density='compact'] .ct-btn {
+  min-height: 22px;
+  padding: 2px 11px;
+  background: var(--web-glass-soft, rgba(104, 111, 151, 0.42));
+  border: 1px solid var(--web-line, var(--border-color));
+  border-radius: 999px;
+  color: var(--text-color);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+:root[data-density='compact'] .ct-btn:hover {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(120, 183, 235, 0.92), rgba(126, 150, 218, 0.88));
+  border-color: rgba(221, 234, 255, 0.32);
+}
+
+:root[data-density='compact'] .ct-theme-btn {
+  padding: 2px 8px;
+  font-size: 13px;
+}
+
+/* ===== 5. 角色資料共用面板 + 常駐頂端結果列 ===== */
+:root[data-density='compact'] .character-input-view {
+  position: relative;
+  margin: 0 0 8px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+:root[data-density='compact'] .character-input-view > .mode-panel.active {
+  padding: 0;
+}
+
+:root[data-density='compact'] .compact-result-bar {
+  position: sticky;
+  top: var(--compact-toolbar-h);
+  z-index: 700;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px;
+  margin: 0;
+  padding: 4px 0 8px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+/*
+ * sticky 外殼只負責排版與定位，不得承擔任何滿寬視覺背景。
+ * 否則 padding、欄間 gap 與 border 會一起黏住，形成橫線和側邊色塊。
+ * 實際遮蔽下方內容的底色由兩張結果卡各自提供。
+ */
+:root[data-density='compact'] .compact-result-bar::before {
+  display: none;
+}
+
+:root[data-density='compact'] .compact-result-bar .combat-power-summary {
+  --combat-power-value-max-size: 22px;
+  --combat-power-value-min-size: 12px;
+  position: static;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  min-height: 56px;
+  margin: 0;
+  padding: 5px 12px;
+  gap: 2px;
+  border-radius: var(--radius-lg);
+  /* 背景由 theme-web 結果卡 surface token 統一供應；此處僅保留幾何與陰影 */
+  box-shadow:
+    0 5px 14px rgba(31, 34, 67, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+:root[data-density='compact'] .compact-result-bar .result-item {
+  min-height: 34px;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+/* ≤768px 媒體查詢內有 font-size: 38px 硬編碼，須恢復 JS 字級自適應 var 鏈 */
+:root[data-density='compact'] .compact-result-bar .combat-power-summary .result-value {
+  font-size: var(--combat-power-value-size, var(--combat-power-value-max-size, 22px));
+  white-space: nowrap;
+}
+
+:root[data-density='compact'] .compact-result-bar .result-label,
+:root[data-density='compact'] .compact-result-bar .combat-power-summary .result-label {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+:root[data-density='compact'] .compact-result-bar .combat-power-summary.is-value-wrapped {
+  min-height: 0;
+}
+
+/* 值過長時允許換行（fit JS 以換行寬度計算字級，nowrap 會造成裁切） */
+:root[data-density='compact']
+  .compact-result-bar
+  .combat-power-summary.is-value-wrapped
+  .result-item {
+  flex-wrap: wrap;
+}
+
+:root[data-density='compact']
+  .compact-result-bar
+  .combat-power-summary.is-value-wrapped
+  .result-item {
+  min-height: 0;
+}
+
+/* 增幅卡改兩行：第一行 標籤+數值、第二行 絕對值副標靠右（完整可見不截斷） */
+:root[data-density='compact'] .compact-result-bar .buff-gain-summary .result-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0 8px;
+}
+
+:root[data-density='compact'] .compact-result-bar .buff-gain-summary .result-label {
+  grid-column: 1;
+}
+
+:root[data-density='compact'] .compact-result-bar .buff-gain-summary .result-value {
+  grid-column: 2;
+  justify-self: start;
+}
+
+/* 增幅數值的淡紫在中明度玻璃底上對比偏低（約 2.4:1，低於大字 3:1 門檻）。
+   略提亮主色並補一層暗色投影撐起對比，保留原本的粉彩發光。 */
+:root[data-density='compact'] .compact-result-bar .buff-gain-summary .buff-gain-value {
+  color: #e7d8ff;
+  text-shadow:
+    0 1px 2px rgba(20, 10, 40, 0.55),
+    0 0 12px rgba(178, 137, 255, 0.4);
+}
+
+/* 當前戰鬥力 / 變更後戰鬥力：補一層暗色投影增加立體感（保留原本青色發光、不改顏色）。 */
+:root[data-density='compact'] .compact-result-bar .combat-power-summary:not(.buff-gain-summary) .result-value,
+:root[data-density='compact'] .equipment-result-value {
+  text-shadow:
+    0 1px 2px rgba(20, 10, 40, 0.55),
+    0 4px 18px rgba(98, 215, 255, 0.28);
+}
+
+:root[data-density='compact'] .compact-result-bar .buff-gain-subvalue {
+  position: static;
+  grid-column: 1 / -1;
+  justify-self: end;
+  margin-left: 0;
+  max-width: 100%;
+  font-size: 10.5px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 中和 ≥768px 的側欄負 margin（calculator.css 的 #calculatorMode .calc-side
+   margin-top: -86px 會把 Buff 面板拉上去蓋住特殊項目）。
+   注意：不可加 #characterInputView 前綴——該 id 在 Vue 版不存在（死選擇器）。 */
+:root[data-density='compact'] #calculatorMode .calc-side,
+:root[data-density='compact'] #effStatsMode .calc-side {
+  margin-top: 0;
+}
+
+/* compact 一律單欄：Buff 改收合面板、不需要側欄（同時消滅 768 斷點互動） */
+:root[data-density='compact'] #calculatorMode .calc-layout,
+:root[data-density='compact'] #effStatsMode .calc-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* 強制長型：calc-main 內 section 一律直疊（壓掉 ≥768 的 2 欄並排），
+   三個分頁在任何視窗寬度下佈局一致 */
+:root[data-density='compact'] #calculatorMode .calc-main {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* 首張資料卡使用穩定的灰紫玻璃底色，避免與頂部霧面層疊加成乳白霧帶。 */
+:root[data-density='compact'] .stat-table-card:has(> .stat-card-head) {
+  z-index: 540;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
+    rgba(105, 105, 139, 0.58);
+  border-color: rgba(222, 232, 250, 0.2);
+  box-shadow:
+    0 8px 20px rgba(48, 45, 77, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: none;
+  transition: none;
+}
+
+:root[data-density='compact'] .stat-table-card:has(> .stat-card-head):hover {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
+    rgba(105, 105, 139, 0.58);
+  border-color: rgba(222, 232, 250, 0.2);
+  box-shadow:
+    0 8px 20px rgba(48, 45, 77, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+:root[data-density='compact'] .stat-table-card:has(> .stat-card-head):has(.main-stat-guide:hover),
+:root[data-density='compact']
+  .stat-table-card:has(> .stat-card-head):has(.main-stat-guide:focus-within) {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
+    rgba(105, 105, 139, 0.58);
+  border-color: rgba(222, 232, 250, 0.2);
+  box-shadow:
+    0 8px 20px rgba(48, 45, 77, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+:root[data-density='compact'][data-theme='dark'] .stat-table-card:has(> .stat-card-head),
+:root[data-density='compact'][data-theme='dark'] .stat-table-card:has(> .stat-card-head):hover,
+:root[data-density='compact'][data-theme='dark']
+  .stat-table-card:has(> .stat-card-head):has(.main-stat-guide:hover),
+:root[data-density='compact'][data-theme='dark']
+  .stat-table-card:has(> .stat-card-head):has(.main-stat-guide:focus-within) {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
+    rgba(51, 59, 96, 0.72);
+  border-color: rgba(205, 220, 245, 0.16);
+}
+
+/* 頁1資料卡與其餘面板共用同一 surface token（原本用不透明的
+   --compact-tool-surface-bg，導致頁1比頁2/3 偏藍偏實、三頁不一致）。 */
+:root[data-density='compact'] #calculatorMode .calc-main > .section,
+:root[data-density='compact'] #calculatorMode .calc-main > .section:hover,
+:root[data-density='compact'] #effStatsMode .calc-main > .section,
+:root[data-density='compact'] #effStatsMode .calc-main > .section:hover {
+  background: var(--surface-overlay), var(--section-bg);
+}
+
+/* ===== 6. 資料切換列（模式分頁 + 職業 + 資料複製）併入主要能力值卡片頂部 =====
+   （compact 不再渲染獨立的 .character-data-summary 區塊） */
+:root[data-density='compact'] .stat-card-head {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+  margin-bottom: 6px;
+  padding-bottom: 8px;
+  /* 與卡片內「攻擊力/傷害」的分界同款柔和分隔線 */
+  border-bottom: 1px solid var(--web-line, var(--border-color));
+}
+
+:root[data-density='compact'] .stat-card-head .mode-tabs {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+:root[data-density='compact'] .stat-card-head .mode-tab {
+  padding: 3px 12px;
+  font-size: 12px;
+}
+
+:root[data-density='compact'] .stat-card-head-controls {
+  display: grid;
+  grid-template-columns: max-content auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+:root[data-density='compact'] .stat-card-head-job {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: auto;
+  min-width: 0;
+}
+
+:root[data-density='compact'] .stat-card-head-label {
+  flex: 0 0 auto;
+  color: rgba(241, 246, 255, 0.9);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+:root[data-density='compact'] .stat-card-head-actions {
+  display: flex;
+  align-items: center;
+  grid-column: 2;
+  gap: 0;
+  min-width: 0;
+  padding: 2px;
+  border: 1px solid rgba(211, 225, 246, 0.2);
+  border-radius: 999px;
+  background: rgba(66, 73, 115, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+:root[data-density='compact'] .stat-card-head .job-picker,
+:root[data-density='compact'] .stat-card-head .job-combobox,
+:root[data-density='compact'] .stat-card-head .job-combobox-control {
+  width: 162px;
+  max-width: 162px;
+  min-width: 162px;
+  margin: 0;
+}
+
+:root[data-density='compact'] .stat-card-head .job-combobox-label {
+  display: none;
+}
+
+:root[data-density='compact'] .stat-card-head #jobSearchInput {
+  height: var(--density-control-h);
+  min-height: var(--density-control-h);
+  padding: 2px 26px 2px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+:root[data-density='compact'] .stat-card-head .job-combobox-toggle {
+  width: 20px;
+  height: 20px;
+  color: rgba(226, 236, 252, 0.72);
+}
+
+:root[data-density='compact'] .stat-card-head .job-combobox-toggle svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 1.5;
+}
+
+:root[data-density='compact'] .stat-card-head .data-copy-btn {
+  --data-copy-btn-width: 132px;
+  min-height: var(--density-control-h);
+  padding: 2px 12px;
+  border: 0;
+  border-radius: 999px 0 0 999px;
+  color: rgba(241, 246, 255, 0.9);
+  background: transparent;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: none;
+}
+
+:root[data-density='compact'] .stat-card-head .data-copy-btn:hover {
+  border-color: transparent;
+  background: rgba(143, 190, 229, 0.14);
+}
+
+:root[data-density='compact'] .stat-card-head .job-option-button {
+  min-height: 30px;
+  padding: 4px 8px;
+  justify-content: center;
+  font-size: 12px;
+  text-align: center;
+}
+
+:root[data-density='compact'] .stat-card-head .job-option-empty {
+  min-height: 30px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+:root[data-density='compact'] .stat-card-head .job-option-list {
+  max-height: 220px;
+  padding: 5px;
+  border-radius: 11px;
+}
+
+:root[data-density='compact'] .stat-preview-btn {
+  min-width: 84px;
+  min-height: var(--density-control-h);
+  padding: 2px 11px;
+  border: 0;
+  border-left: 1px solid rgba(211, 225, 246, 0.16);
+  border-radius: 0 999px 999px 0;
+  color: rgba(241, 246, 255, 0.9);
+  background: transparent;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+:root[data-density='compact'] .stat-preview-btn:hover {
+  color: #ffffff;
+  background: rgba(143, 190, 229, 0.14);
+  border-left-color: rgba(211, 225, 246, 0.16);
+}
+
+/* 職業下拉展開時讓主要能力值卡浮到其他卡片之上 */
+:root[data-density='compact'] .stat-table-card:has(.job-option-list:not([hidden])) {
+  z-index: 580;
+}
+
+/* 「?」說明按鈕縮小（外觀沿用主題） */
+:root[data-density='compact'] .buff-info-trigger {
+  width: 16px;
+  height: 16px;
+  min-height: 16px;
+  font-size: 9px;
+}
+
+/* Tooltip 跟著說明圖示展開，並限制寬度避免超出桌面視窗。 */
+:root[data-density='compact'] .buff-info {
+  position: relative;
+}
+
+:root[data-density='compact'] .buff-info-tooltip {
+  left: 0;
+  right: auto;
+  width: min(320px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+}
+
+/* Buff 說明以整條標題列為定位基準，固定留在 Buff 卡片內。 */
+:root[data-density='compact'] .buff-head .buff-info {
+  position: static;
+}
+
+:root[data-density='compact'] .buff-head .buff-info-tooltip {
+  left: 0;
+  right: auto;
+  width: min(300px, calc(100% - 8px));
+  max-width: calc(100% - 8px);
+}
+
+:root[data-density='compact'] .buff-head .buff-info-list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 7px;
+}
+
+:root[data-density='compact'] .buff-head .buff-info-row {
+  grid-template-columns: minmax(90px, max-content) minmax(0, 1fr);
+}
+
+/* 武器校正名稱需完整單行顯示，數值欄承接剩餘空間。 */
+:root[data-density='compact'] .weapon-correction-tooltip {
+  width: min(190px, calc(100vw - 32px));
+  max-width: min(190px, calc(100vw - 32px));
+  padding: 8px 10px 9px;
+}
+
+:root[data-density='compact'] .weapon-correction-tooltip .weapon-correction-list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 5px;
+}
+
+:root[data-density='compact'] .weapon-correction-tooltip .buff-info-row {
+  grid-template-columns: max-content max-content;
+  justify-content: start;
+  column-gap: 7px;
+}
+
+:root[data-density='compact'] .weapon-correction-tooltip .buff-info-name,
+:root[data-density='compact'] .weapon-correction-tooltip .buff-info-value {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+:root[data-density='compact'] .compact-subtitle {
+  padding: 1px 8px;
+  font-size: 11px;
+}
+
+:root[data-density='compact'] .final-auto-status {
+  min-height: 18px;
+  padding: 1px 8px;
+}
+
+/* ===== 7. 高密度表單：強制表格模式（覆寫 @container 卡片化；只動幾何） ===== */
+:root[data-density='compact'] .st-row--head {
+  display: grid;
+}
+
+:root[data-density='compact'] .st-colhead {
+  font-size: 11px;
+}
+
+:root[data-density='compact'] .compact-main-stat-guide-cell {
+  position: relative;
+  display: flex;
+  align-items: end;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+:root[data-density='compact'] .compact-main-stat-guide {
+  display: inline-flex;
+  margin: 0 0 1px 2px;
+}
+
+:root[data-density='compact'] .compact-main-stat-guide .main-stat-guide-tooltip {
+  top: calc(100% + 6px);
+  left: 0;
+  right: auto;
+  width: min(300px, calc(100vw - 32px));
+}
+
+:root[data-density='compact'] .stat-table--main .st-cell-label,
+:root[data-density='compact'] .stat-table--effmain .st-cell-label {
+  display: none;
+}
+
+/* 欄寬設上限：輸入框貼近標題、不再被拉寬 */
+:root[data-density='compact'] #calculatorMode .stat-table--main .st-row {
+  grid-template-columns: minmax(34px, 50px) repeat(5, minmax(0, 92px));
+  justify-content: start;
+  gap: 3px 5px;
+}
+
+:root[data-density='compact'] #effStatsMode .stat-table--effmain .st-row {
+  grid-template-columns: minmax(44px, 64px) repeat(3, minmax(0, 116px));
+  justify-content: start;
+  gap: 3px 5px;
+}
+
+:root[data-density='compact'] .stat-table--dmg .st-row {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 3px 6px;
+}
+
+:root[data-density='compact'] #calculatorMode .stat-table--bonus .st-row {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 3px 6px;
+}
+
+:root[data-density='compact'] #calculatorMode .stat-table--main .st-row,
+:root[data-density='compact'] #calculatorMode .stat-table--bonus .st-row,
+:root[data-density='compact'] #effStatsMode .stat-table--effmain .st-row {
+  padding: 1px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+:root[data-density='compact'] #calculatorMode .stat-table--main,
+:root[data-density='compact'] #calculatorMode .stat-table--bonus,
+:root[data-density='compact'] #effStatsMode .stat-table--effmain {
+  gap: 2px;
+}
+
+:root[data-density='compact'] .stat-table {
+  gap: 2px;
+}
+
+:root[data-density='compact'] .st-rowhead {
+  grid-column: auto;
+  font-size: 12px;
+}
+
+:root[data-density='compact'] .st-rowhead--check {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: auto;
+}
+
+:root[data-density='compact'] .st-cell {
+  gap: 2px;
+}
+
+:root[data-density='compact'] .stat-table--dmg .st-cell-label,
+:root[data-density='compact'] .stat-table--bonus .st-cell-label {
+  font-size: 10.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:root[data-density='compact'] .special-stats-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px 8px;
+}
+
+/* 特殊能力值併入主要能力值卡片內（compact 模板搬移）：柔和分隔線 */
+:root[data-density='compact'] .stat-table-card .stat-table--main + .stat-table--dmg,
+:root[data-density='compact'] .stat-table-card .stat-table--effmain + .special-stats-grid {
+  margin-top: 5px;
+  padding-top: 7px;
+  border-top: 1px solid var(--web-line, var(--border-color));
+}
+
+:root[data-density='compact'] .bonus-extra-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px 8px;
+}
+
+/* 輸入控件：壓高度/字級，外觀（玻璃底、內光、邊框色）沿用主題 */
+:root[data-density='compact'] input,
+:root[data-density='compact'] select {
+  padding: 2px 6px;
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+}
+
+:root[data-density='compact'] .stat-table input,
+:root[data-density='compact'] .stat-table select,
+:root[data-density='compact'] .stat-table .custom-select-trigger {
+  height: var(--density-control-h);
+  min-height: var(--density-control-h);
+}
+
+:root[data-density='compact'] .custom-select-trigger {
+  min-height: var(--density-control-h);
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+:root[data-density='compact'] .custom-select-trigger::after {
+  right: 10px;
+  width: 6px;
+  height: 6px;
+  border-width: 0 1.5px 1.5px 0;
+  opacity: 0.68;
+}
+
+:root[data-density='compact'] .custom-select-option {
+  min-height: 28px;
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+:root[data-density='compact'] .power-coefficient-toggle::after {
+  width: 6px;
+  height: 6px;
+  border-width: 0 1.5px 1.5px 0;
+  opacity: 0.68;
+}
+
+/* 特殊項目的純數值欄維持同一條置中基準；P 寵箭頭不再用分隔線切開。 */
+:root[data-density='compact'] #adjPetAtk,
+:root[data-density='compact'] #famFinal {
+  text-align: center;
+}
+
+:root[data-density='compact'] #adjPetAtk + .power-coefficient-toggle,
+:root[data-density='compact']
+  .power-coefficient-combobox:has(#adjPetAtk)
+  .power-coefficient-toggle {
+  border-left: 0;
+}
+
+:root[data-density='compact'] .power-coefficient-option {
+  min-height: 28px;
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+:root[data-density='compact'] label {
+  font-size: var(--density-fs-small);
+  margin-bottom: 3px;
+}
+
+:root[data-density='compact'] .input-group {
+  margin-bottom: 3px;
+}
+
+/* ===== 8. Buff 面板：緊湊圖示網格 + 一鍵收合 ===== */
+:root[data-density='compact'] .buff-panel {
+  gap: 6px;
+  padding: 6px 9px;
+}
+
+:root[data-density='compact'] .buff-summary-bar {
+  top: calc(var(--compact-toolbar-h) + 4px);
+  z-index: 100;
+  margin-top: 4px;
+  margin-bottom: 7px;
+  border-radius: 11px;
+}
+
+:root[data-density='compact'] .character-input-view > .buff-summary-bar {
+  top: calc(var(--compact-toolbar-h) + 68px);
+  z-index: 89;
+}
+
+:root[data-density='compact'] .buff-quick-row {
+  min-height: 33px;
+  padding: 3px 7px;
+  gap: 4px;
+}
+
+:root[data-density='compact'] .buff-quick-count {
+  font-size: 11px;
+  padding-right: 6px;
+}
+
+:root[data-density='compact'] .buff-quick-count strong {
+  font-size: 12px;
+}
+
+:root[data-density='compact'] .buff-quick-count::after,
+:root[data-density='compact'] .buff-quick-chips::after {
+  height: 16px;
+}
+
+:root[data-density='compact'] .buff-quick-chips {
+  gap: 3px;
+  padding-right: 6px;
+}
+
+:root[data-density='compact'] .buff-quick-chip-wrap,
+:root[data-density='compact'] .buff-quick-chip,
+:root[data-density='compact'] .buff-quick-all {
+  min-height: 24px;
+}
+
+:root[data-density='compact'] .buff-quick-chip-wrap {
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+}
+
+:root[data-density='compact'] .buff-quick-chip {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+:root[data-density='compact'] .buff-quick-chip,
+:root[data-density='compact'] .buff-quick-all {
+  padding: 2px 7px;
+  font-size: 10.5px;
+}
+
+:root[data-density='compact'] .buff-quick-chip {
+  padding: 0;
+}
+
+:root[data-density='compact'] .buff-quick-icon-frame {
+  width: 100%;
+  height: 100%;
+}
+
+:root[data-density='compact'] .buff-quick-icon {
+  width: 24px;
+  height: 24px;
+}
+
+:root[data-density='compact'] .buff-quick-level-label {
+  right: -4px;
+  bottom: -3px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  font-size: 9px;
+  line-height: 12px;
+}
+
+:root[data-density='compact'] .buff-summary-bar + .equipment-result {
+  top: calc(var(--compact-toolbar-h) + 44px);
+}
+
+:root[data-density='compact'] .buff-overlay-head {
+  padding: 8px 10px;
+}
+
+:root[data-density='compact'] .buff-overlay-head h2 {
+  font-size: 17px;
+}
+
+:root[data-density='compact'] .buff-overlay-body {
+  padding: 5px 7px 7px;
+}
+
+:root[data-density='compact'] .buff-overlay-body .buff-panel--embedded {
+  gap: 7px;
+  padding: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+/* Buff 說明往上展開時，整個側欄需高於首張資料卡，避免職業列與指南問號穿透浮層。 */
+:root[data-density='compact'] .calc-side:has(.buff-info:hover),
+:root[data-density='compact'] .calc-side:has(.buff-info:focus-within) {
+  position: relative;
+  z-index: 620;
+}
+
+:root[data-density='compact'] .buff-panel:has(.buff-info:hover),
+:root[data-density='compact'] .buff-panel:has(.buff-info:focus-within) {
+  position: relative;
+  z-index: 620;
+}
+
+:root[data-density='compact'] .buff-panel:has(.buff-info:hover) .buff-info-tooltip,
+:root[data-density='compact'] .buff-panel:has(.buff-info:focus-within) .buff-info-tooltip {
+  z-index: 630;
+}
+
+:root[data-density='compact'] .buff-head {
+  gap: 4px 8px;
+  align-items: center;
+}
+
+:root[data-density='compact'] .buff-master-actions {
+  align-items: center;
+  line-height: 1;
+}
+
+:root[data-density='compact'] .buff-master-btn {
+  min-height: 22px;
+  padding: 2px 8px;
+  font-size: 10.5px;
+}
+
+:root[data-density='compact'] .buff-head-title {
+  font-size: var(--density-fs-title);
+}
+
+:root[data-density='compact'] .buff-head-title::before {
+  font-size: 13px;
+}
+
+:root[data-density='compact'] .buff-head-count {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--muted-color);
+  white-space: nowrap;
+}
+
+:root[data-density='compact'] .buff-collapse-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 20px;
+  padding: 1px 10px;
+  background: var(--web-glass-soft, rgba(104, 111, 151, 0.42));
+  border: 1px solid var(--web-line, var(--border-color));
+  border-radius: 999px;
+  color: var(--text-color);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+:root[data-density='compact'] .buff-collapse-chevron {
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  opacity: 0.68;
+  transform: translateY(-1px) rotate(45deg);
+  transition: transform 0.16s ease;
+}
+
+:root[data-density='compact'] .buff-collapse-chevron.is-expanded {
+  transform: translateY(1px) rotate(225deg);
+}
+
+:root[data-density='compact'] .buff-collapse-toggle:hover {
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(120, 183, 235, 0.92), rgba(126, 150, 218, 0.88));
+  border-color: rgba(221, 234, 255, 0.32);
+}
+
+:root[data-density='compact'] .buff-section {
+  gap: 4px;
+}
+
+:root[data-density='compact'] .buff-section-title {
+  font-size: 12px;
+  padding: 1px 0 3px 9px;
+}
+
+:root[data-density='compact'] .buff-grid {
+  grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+  gap: 4px 2px;
+}
+
+:root[data-density='compact'] .buff-item {
+  min-height: 48px;
+  gap: 2px;
+}
+
+:root[data-density='compact'] .buff-icon-wrap {
+  width: 28px;
+  height: 28px;
+}
+
+:root[data-density='compact'] .buff-icon {
+  width: 24px;
+  height: 24px;
+}
+
+:root[data-density='compact'] .buff-control--level .buff-level {
+  width: 34px;
+  height: 18px;
+  min-height: 18px;
+  font-size: 11px;
+}
+
+:root[data-density='compact'] .buff-soul-orb-value {
+  min-height: 24px;
+  padding: 2px 9px;
+  font-size: 12px;
+}
+
+:root[data-density='compact'] .soul-orb-select + .custom-select .custom-select-trigger {
+  min-height: 24px;
+  padding: 2px 28px 2px 10px;
+  font-size: 12px;
+}
+
+/* ===== 9. 裝備變更分頁：直式三段結果區（圖2 形式） ===== */
+:root[data-density='compact'] .equipment-result {
+  position: sticky;
+  top: var(--compact-toolbar-h);
+  z-index: 60;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0 calc(-1 * var(--page-gutter)) 8px;
+  padding: 5px var(--page-gutter) 8px;
+  gap: 8px;
+}
+
+:root[data-density='compact'] .equipment-result::before {
+  content: '';
+  position: absolute;
+  /* 上緣外擴 1px 接住工具列模糊層（消除髮絲縫） */
+  inset: -1px 0 0 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--compact-bar-bg) 0%, transparent 100%);
+  backdrop-filter: blur(14px) saturate(1.05);
+  mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
+}
+
+/* 一體成形外卡（compact 幾何）+ 取消內層 result 原本的 sticky 滿版標頭處理，
+   讓結果摘要單純當外卡標頭，不再負邊距溢出。 */
+:root[data-density='compact'] .equipment-change-result {
+  margin: 0 0 8px;
+  padding: 10px;
+  border-radius: 14px;
+}
+
+:root[data-density='compact'] .equipment-change-result > .equipment-result {
+  position: static;
+  top: auto;
+  margin: 0;
+  padding: 0;
+}
+
+:root[data-density='compact'] .equipment-change-result > .equipment-result::before {
+  display: none;
+}
+
+:root[data-density='compact'] .equipment-result-card {
+  width: 100%;
+  min-height: 46px;
+  min-width: 0;
+  padding: 4px 14px;
+  gap: 4px 14px;
+  border-radius: var(--radius-lg);
+}
+
+:root[data-density='compact'] .equipment-result-rows {
+  gap: 4px 14px;
+}
+
+:root[data-density='compact'] .equipment-result-row {
+  gap: 10px;
+}
+
+:root[data-density='compact'] .equipment-result-label {
+  font-size: 13px;
+}
+
+:root[data-density='compact'] .equipment-result-value {
+  font-size: 22px;
+}
+
+:root[data-density='compact'] .equipment-gain-summary {
+  width: 100%;
+  max-width: none;
+  flex: none;
+  /* 與下方原裝備/變更後裝備雙欄同 gap，左右緣與中縫對齊 */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+:root[data-density='compact'] .equipment-gain-badge {
+  min-height: 36px;
+  padding: 2px 10px;
+  gap: 8px;
+  font-size: 18px;
+}
+
+:root[data-density='compact'] .equipment-gain-label {
+  font-size: 14px;
+}
+
+:root[data-density='compact'] .equipment-grid {
+  /* 固定雙欄（原裝備｜變更後裝備），不隨媒體斷點變化 */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+/* 裝備欄位改為「標籤｜輸入框」橫排，高度減半 */
+:root[data-density='compact'] .equipment-grid .section > .input-group {
+  display: grid;
+  grid-template-columns: minmax(64px, 0.8fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+}
+
+:root[data-density='compact'] .equipment-grid .section > .input-group label {
+  margin-bottom: 0;
+  text-align: right;
+  font-size: 11px;
+}
+
+:root[data-density='compact'] .equipment-grid .section > .input-group input,
+:root[data-density='compact'] .equipment-grid .section > .input-group select {
+  min-height: var(--density-control-h);
+  width: 100%;
+  max-width: none;
+  justify-self: stretch;
+}
+
+:root[data-density='compact']
+  .equipment-grid
+  .section
+  > .input-group.has-input-unit
+  .equipment-input-wrap {
+  max-width: none;
+  width: 100%;
+}
+
+:root[data-density='compact'] .equipment-efficiency-combat-toggle,
+:root[data-density='compact'] .equipment-efficiency-custom-panel summary,
+:root[data-density='compact'] .equipment-efficiency-mode-btn {
+  min-height: 24px;
+  padding: 2px 10px;
+  font-size: 12px;
+}
+
+/* ===== 10. 數值換算分頁：長型視窗下的密度與平衡 ===== */
+:root[data-density='compact'] .equipment-efficiency-result {
+  margin: 0 0 8px;
+  padding: 8px;
+  border-radius: 14px;
+  /* 背景由 equipment.css 結果卡 surface token 統一供應 */
+}
+
+:root[data-density='compact'] .equipment-efficiency-toolbar {
+  gap: 6px;
+}
+
+:root[data-density='compact'] .equipment-equivalence-grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 5px;
+}
+
+:root[data-density='compact'] .equipment-equivalence-row {
+  min-height: 26px;
+  padding: 3px 10px;
+}
+
+/* 「自訂顯示項目」展開不得推擠版面寬度 */
+:root[data-density='compact'] .equipment-efficiency-custom-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 100%;
+  min-width: 0;
+}
+
+/* ===== 11. 第三輪：Buff UI 簡化 ===== */
+/* check 型 buff 點圖示即可切換，勾選框移除、列高縮小 */
+:root[data-density='compact'] .buff-item[data-buff-type='check'] .buff-control--check {
+  display: none;
+}
+
+:root[data-density='compact'] .buff-item[data-buff-type='check'] {
+  min-height: 32px;
+}
+
+/* Tooltip：固定 px 上限（避免 zoom 放大 vh），內部可捲 */
+:root[data-density='compact'] .buff-info-tooltip {
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+/* 圖片指南改以較小尺寸完整顯示，不套用長表格 Tooltip 的內部捲軸。 */
+:root[data-density='compact'] .main-stat-guide-tooltip {
+  width: min(250px, calc(100vw - 32px));
+  max-width: min(250px, calc(100vw - 32px));
+  max-height: none;
+  overflow: visible;
+}
+
+/* 「?」沿用系統字體（與全站一致），置中 */
+:root[data-density='compact'] .buff-info-trigger {
+  font-weight: 700;
+}
+
+:root[data-density='compact'] .buff-info-trigger::before {
+  transform: none;
+  line-height: 1;
+}
+
+/* ===== 13. 表格內標籤高度齊一（label-tag pill 不再撐高） ===== */
+:root[data-density='compact'] .stat-table--dmg .st-cell-label,
+:root[data-density='compact'] .stat-table--bonus .st-cell-label {
+  height: 15px;
+  line-height: 15px;
+}
+
+/* 含問號的傷害標籤：放寬固定高度與 overflow，讓行內問號與 tooltip 完整顯示。 */
+:root[data-density='compact'] .stat-table--dmg .st-cell--info .st-cell-label {
+  height: auto;
+  overflow: visible;
+}
+
+/* 傷害說明 tooltip：文字短，取消內部 max-height/捲軸（仿 main-stat-guide-tooltip）；
+   寬度依內容收縮（蓋過 :root[data-density=compact] .buff-info-tooltip 的固定 width）。 */
+:root[data-density='compact'] .st-cell--info .dmg-bug-info .buff-info-tooltip {
+  width: min(260px, calc(100vw - 32px));
+  max-height: none;
+  overflow: visible;
+}
+
+:root[data-density='compact'] .label-tag {
+  padding: 0 4px;
+  font-size: 9px;
+  line-height: 13px;
+  vertical-align: 0;
+}
+
+/* ===== 14. 職業特殊項目：緊湊直排 + 下拉浮層 ===== */
+:root[data-density='compact'] .bonus-extra-grid--special {
+  grid-template-columns: repeat(4, minmax(0, 118px));
+  justify-content: start;
+  gap: 5px 8px;
+}
+
+:root[data-density='compact'] .bonus-extra-grid--special .input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  margin-bottom: 0;
+}
+
+:root[data-density='compact'] .bonus-extra-grid--special .input-group label {
+  margin-bottom: 0;
+}
+
+/* 職業特殊項目輸入框/下拉不可滿欄拉寬 */
+:root[data-density='compact'] .bonus-extra-grid--special .input-group input,
+:root[data-density='compact'] .bonus-extra-grid--special .input-group select,
+:root[data-density='compact'] .bonus-extra-grid--special .input-group .custom-select,
+:root[data-density='compact'] .bonus-extra-grid--special .input-group .power-coefficient-combobox {
+  width: 100%;
+  max-width: 118px;
+}
+
+:root[data-density='compact'] .bonus-extra-grid--special .input-group input,
+:root[data-density='compact'] .bonus-extra-grid--special .input-group select,
+:root[data-density='compact'] .bonus-extra-grid--special .custom-select-trigger,
+:root[data-density='compact'] .bonus-extra-grid--special .power-coefficient-combobox input {
+  height: var(--density-control-h);
+  min-height: var(--density-control-h);
+  padding-top: 2px;
+  padding-bottom: 2px;
+  font-size: 12px;
+}
+
+:root[data-density='compact']
+  .bonus-extra-grid--special
+  #ruinFinal
+  + .custom-select
+  .custom-select-trigger {
+  height: var(--density-control-h);
+  min-height: var(--density-control-h);
+  padding: 2px 26px 2px 10px;
+}
+
+:root[data-density='compact'] .section:has(.power-coefficient-combobox.is-open) {
+  position: relative;
+  z-index: 580;
+}
+
+/* ===== 15. 靈魂寶珠列：圖示 + 縮窄的輸入框/下拉（約原 2/3 寬） ===== */
+:root[data-density='compact'] .buff-section--soul-orb {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+:root[data-density='compact'] .buff-section--soul-orb .buff-section-title {
+  flex: 0 0 100%;
+  /* 不需要拉滿整行的底線 */
+  border-bottom: 0;
+}
+
+:root[data-density='compact'] .buff-section--soul-orb .buff-section-title::before {
+  content: none;
+}
+
+:root[data-density='compact'] .buff-soul-orb-items {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+:root[data-density='compact'] .buff-soul-orb-items .buff-item {
+  width: auto;
+  min-height: 32px;
+}
+
+:root[data-density='compact'] .buff-soul-orb-control {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: none;
+  grid-template-columns: minmax(52px, 64px) minmax(96px, 150px);
+  gap: 6px;
+}
+
+/* ===== 16. 第四輪：% 後綴圖示縮小（theme-web/calculator 以 id 直設，:is 提升特異度蓋回） ===== */
+:root[data-density='compact']
+  :is(
+    #percentMain,
+    #skillPercentMain,
+    #percentSub,
+    #skillPercentSub,
+    #percentSubtwo,
+    #skillPercentSubtwo,
+    #percentAtk,
+    #skillPercentAtk,
+    #dmg,
+    #skillDmg,
+    #bossDmg,
+    #skillBossDmg,
+    #critDmg,
+    #skillCritDmg,
+    #famFinal,
+    #adjEventBossDmg,
+    #adjMentorBossDmg,
+    #adjZeroWeaponFlameBossDmg,
+    #eqOldPercentMain,
+    #eqOldPercentSub,
+    #eqOldPercentSubtwo,
+    #eqOldAllStatPercent,
+    #eqOldPercentAtk,
+    #eqOldDmg,
+    #eqOldBossDmg,
+    #eqOldCritDmg,
+    #eqOldFamFinal,
+    #eqOldIgnoreDefense,
+    #eqNewPercentMain,
+    #eqNewPercentSub,
+    #eqNewPercentSubtwo,
+    #eqNewAllStatPercent,
+    #eqNewPercentAtk,
+    #eqNewDmg,
+    #eqNewBossDmg,
+    #eqNewCritDmg,
+    #eqNewFamFinal,
+    #eqNewIgnoreDefense,
+    #effPercentMain,
+    #effPercentSub,
+    #effPercentSubtwo,
+    #effPercentAtk,
+    #effDmg,
+    #effBossDmg,
+    #effCritDmg,
+    #effFamFinal,
+    #effIgnoreDefense,
+    #effMonsterDefense
+  ) {
+  background-image: var(--percent-suffix-icon);
+  background-size: 13px 13px;
+  background-position: right 7px center;
+  padding-right: 22px;
+  padding-left: 22px;
+}
+
+/* 裝備雙欄的輸入框較窄，縮小兩側保留空間，避免四位數在輸入時被原生欄位橫向捲動裁切。 */
+:root[data-density='compact']
+  .equipment-grid
+  :is(
+    #eqOldPercentMain,
+    #eqOldPercentSub,
+    #eqOldPercentSubtwo,
+    #eqOldAllStatPercent,
+    #eqOldPercentAtk,
+    #eqOldDmg,
+    #eqOldBossDmg,
+    #eqOldCritDmg,
+    #eqOldFamFinal,
+    #eqOldIgnoreDefense,
+    #eqNewPercentMain,
+    #eqNewPercentSub,
+    #eqNewPercentSubtwo,
+    #eqNewAllStatPercent,
+    #eqNewPercentAtk,
+    #eqNewDmg,
+    #eqNewBossDmg,
+    #eqNewCritDmg,
+    #eqNewFamFinal,
+    #eqNewIgnoreDefense
+  ) {
+  padding-right: 18px;
+  padding-left: 18px;
+  background-position: right 5px center;
+}
+
+/* ===== 17. 第四輪：數值換算分頁寬度/比例 ===== */
+:root[data-density='compact'] .equipment-efficiency-result,
+:root[data-density='compact'] .equipment-efficiency-table,
+:root[data-density='compact'] .equipment-efficiency-panel {
+  width: 100%;
+  min-width: 0;
+}
+
+:root[data-density='compact'] .equipment-efficiency-custom-panel summary {
+  min-height: 22px;
+  padding: 2px 10px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+:root[data-density='compact'] .equipment-efficiency-combat-toggle {
+  min-height: 22px;
+  padding: 1px 9px;
+  font-size: 12px;
+}
+
+:root[data-density='compact'] .equipment-efficiency-custom-grid {
+  gap: 3px 8px;
+}
+
+:root[data-density='compact'] .equipment-efficiency-custom-option {
+  min-height: 18px;
+  gap: 4px;
+  padding: 3px 10px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+:root[data-density='compact'] .equipment-efficiency-custom-option input[type='checkbox'] {
+  width: 13px;
+  height: 13px;
+  min-height: 13px;
+}
+
+/* ===== 18. 第五輪：結果列/裝備變更/數值換算 細部修正 ===== */
+
+/* 增幅卡：戰鬥力副標改回絕對定位釘在卡片右下，主列維持垂直置中不被擠開 */
+:root[data-density='compact'] .compact-result-bar .buff-gain-summary {
+  position: relative;
+  top: 0;
+}
+
+/* 副標的絕對定位錨點必須是整張卡（result-item 在 layout.css 是 relative） */
+:root[data-density='compact'] .compact-result-bar .buff-gain-summary .result-item {
+  position: static;
+  min-height: 44px;
+  height: 100%;
+  align-content: center;
+}
+
+:root[data-density='compact'] .compact-result-bar .buff-gain-subvalue {
+  position: absolute;
+  right: 12px;
+  bottom: 4px;
+  max-width: calc(100% - 24px);
+}
+
+/* 問號說明鈕固定在卡片右上角（絕對定位、脫離排版流，不推移標籤/數值）。
+   高權重以蓋過 @media(max-width:640) 的 .buff-info{position:static}，避免它退回行內變左上角。 */
+:root[data-density='compact'] .compact-result-bar .buff-gain-summary .buff-gain-info {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  left: auto;
+  z-index: 3;
+}
+
+/* 此 tooltip 以右緣對齊往左展開（觸發鈕在右上角），避免溢出視窗右邊。
+   權重須高於 :root[data-density=compact] .buff-info-tooltip（它預設 left:0 會往右展開）。 */
+:root[data-density='compact'] .compact-result-bar .buff-gain-summary .buff-gain-info .buff-info-tooltip {
+  left: auto;
+  right: 0;
+  width: min(320px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+}
+
+/* 數值預覽浮層 */
+:root[data-density='compact'] .stat-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(28, 31, 58, 0.46);
+  backdrop-filter: blur(8px);
+}
+
+:root[data-density='compact'] .stat-preview-dialog {
+  width: min(610px, 100%);
+  max-height: calc(100vh - 34px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable both-edges;
+  padding: 15px;
+  border: 1px solid rgba(225, 235, 255, 0.3);
+  border-radius: 18px;
+  color: var(--text-color);
+  background:
+    radial-gradient(circle at 88% 8%, rgba(196, 164, 255, 0.18), transparent 34%),
+    linear-gradient(160deg, rgba(91, 102, 151, 0.96), rgba(71, 75, 119, 0.96));
+  box-shadow:
+    0 26px 70px rgba(33, 32, 66, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+:root[data-density='compact'][data-theme='dark'] .stat-preview-dialog {
+  background:
+    radial-gradient(circle at 88% 8%, rgba(147, 111, 214, 0.18), transparent 34%),
+    linear-gradient(160deg, rgba(45, 54, 94, 0.98), rgba(31, 36, 68, 0.98));
+}
+
+:root[data-density='compact'] .stat-preview-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+:root[data-density='compact'] .stat-preview-head h2 {
+  margin: 2px 0 0;
+  font-size: 20px;
+}
+
+:root[data-density='compact'] .stat-preview-kicker {
+  color: rgba(225, 235, 255, 0.72);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+:root[data-density='compact'] .stat-preview-close {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid rgba(226, 237, 255, 0.25);
+  border-radius: 999px;
+  color: #f6f9ff;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+:root[data-density='compact'] .stat-preview-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 12px;
+  padding: 4px;
+  border: 1px solid rgba(225, 235, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(36, 42, 78, 0.22);
+}
+
+:root[data-density='compact'] .stat-preview-tabs button {
+  min-height: 27px;
+  border: 0;
+  border-radius: 999px;
+  color: rgba(235, 242, 255, 0.76);
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+:root[data-density='compact'] .stat-preview-tabs button.active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(120, 183, 235, 0.92), rgba(137, 132, 218, 0.9));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+:root[data-density='compact'] .stat-preview-note {
+  margin: 9px 3px 10px;
+  color: rgba(229, 237, 250, 0.72);
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+
+:root[data-density='compact'] .stat-preview-note span {
+  color: rgba(194, 226, 255, 0.9);
+  font-weight: 800;
+}
+
+:root[data-density='compact'] .stat-preview-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+:root[data-density='compact'] .stat-preview-panel {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(225, 235, 255, 0.16);
+  border-radius: 13px;
+  background: rgba(31, 37, 72, 0.2);
+}
+
+:root[data-density='compact'] .stat-preview-panel h3 {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 13px;
+}
+
+:root[data-density='compact'] .stat-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+:root[data-density='compact'] .stat-preview-item {
+  position: relative;
+  min-width: 0;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 7px 9px;
+  border: 1px solid rgba(225, 235, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+:root[data-density='compact'] .stat-preview-item > span {
+  color: rgba(244, 248, 255, 0.9);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+:root[data-density='compact'] .stat-preview-item strong {
+  overflow: hidden;
+  color: #aee8ff;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-density='compact'] .stat-preview-item.has-detail {
+  cursor: help;
+}
+
+:root[data-density='compact'] .stat-preview-item.has-detail::after {
+  content: '';
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(158, 215, 255, 0.88);
+  box-shadow: 0 0 6px rgba(142, 215, 255, 0.42);
+}
+
+:root[data-density='compact'] .stat-preview-item.has-detail:hover,
+:root[data-density='compact'] .stat-preview-item.has-detail:focus-visible {
+  border-color: rgba(175, 220, 255, 0.38);
+  background: rgba(143, 190, 229, 0.13);
+  outline: none;
+}
+
+:root[data-density='compact'] .stat-preview-tooltip {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 5px);
+  z-index: 30;
+  display: none;
+  width: max-content;
+  max-width: min(170px, calc(100vw - 64px));
+  padding: 7px 9px;
+  border: 1px solid rgba(205, 226, 255, 0.3);
+  border-radius: 9px;
+  color: #edf6ff;
+  background: linear-gradient(180deg, rgba(58, 69, 113, 0.99), rgba(40, 48, 87, 0.99));
+  box-shadow:
+    0 12px 28px rgba(20, 23, 48, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+:root[data-density='compact'] .stat-preview-tooltip::before {
+  content: '';
+  position: absolute;
+  left: 28px;
+  top: -5px;
+  width: 8px;
+  height: 8px;
+  border-top: 1px solid rgba(205, 226, 255, 0.3);
+  border-left: 1px solid rgba(205, 226, 255, 0.3);
+  background: rgba(58, 69, 113, 0.99);
+  transform: rotate(45deg);
+}
+
+:root[data-density='compact'] .stat-preview-item:nth-child(even) .stat-preview-tooltip {
+  right: 0;
+  left: auto;
+}
+
+:root[data-density='compact'] .stat-preview-item:nth-child(even) .stat-preview-tooltip::before {
+  right: 28px;
+  left: auto;
+}
+
+:root[data-density='compact'] .stat-preview-tooltip > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 21px;
+  font-size: 11px;
+}
+
+:root[data-density='compact'] .stat-preview-tooltip span {
+  color: rgba(226, 236, 251, 0.78);
+  white-space: nowrap;
+}
+
+:root[data-density='compact'] .stat-preview-tooltip b {
+  color: #c9f4d2;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+:root[data-density='compact'] .stat-preview-item.has-detail:hover .stat-preview-tooltip,
+:root[data-density='compact'] .stat-preview-item.has-detail:focus-visible .stat-preview-tooltip {
+  display: block;
+}
+
+/* 裝備變更：
+   1) width:auto 讓負邊距左右真正外擴（width:100% 會使整條左移 8px，
+      造成內容與下方原裝備/變更後裝備雙欄右緣差 16px 不對齊）
+   2) margin-bottom 歸零：上(結果卡→徽章)與下(徽章→裝備雙欄)間距一致 8px */
+:root[data-density='compact'] .equipment-result {
+  width: auto;
+  max-width: none;
+  margin-bottom: 0;
+}
+
+/* 變更後戰鬥力差值字級配合 22px 主數值 */
+:root[data-density='compact'] .equipment-result-diff {
+  font-size: 13px;
+}
+
+/* 數值換算：外層改為接近裝備頁的灰紫玻璃，內層結果列維持深色對比。 */
+:root[data-density='compact'] .equipment-efficiency-group {
+  border-color: rgba(220, 230, 248, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.028)),
+    rgba(101, 103, 139, 0.62);
+  box-shadow:
+    0 7px 18px rgba(48, 45, 77, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+:root[data-density='compact'][data-theme='dark'] .equipment-efficiency-group {
+  border-color: rgba(205, 220, 245, 0.17);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018)),
+    rgba(49, 58, 96, 0.7);
+  box-shadow:
+    0 7px 18px rgba(20, 24, 48, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+:root[data-density='compact'] .equipment-efficiency-group summary {
+  min-height: 34px;
+  padding: 6px 10px;
+}
+
+:root[data-density='compact'] .equipment-efficiency-metric-trigger {
+  min-height: 25px;
+  padding: 3px 22px;
+  font-size: 12.5px;
+}
+
+:root[data-density='compact'] .equipment-efficiency-metric-trigger::after {
+  right: 10px;
+  width: 6px;
+  height: 6px;
+  border-width: 0 1.5px 1.5px 0;
+  opacity: 0.68;
+}
+
+:root[data-density='compact'] .equipment-efficiency-metric-option {
+  min-height: 28px;
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+:root[data-density='compact'] .equipment-efficiency-unit-control input {
+  padding: 3px 7px;
+  font-size: 12.5px;
+}
+
+:root[data-density='compact'] .equipment-equivalence-value {
+  font-size: 14px;
+}
+
+/* 塔戒增幅 */
+:root[data-density='compact'] .tower-ring-section {
+  margin-top: 10px;
+}
+
+:root[data-density='compact'] .tower-ring-trial-controls {
+  gap: 5px;
+  padding: 2px 4px 2px 7px;
+}
+
+:root[data-density='compact'] .tower-ring-trial-option {
+  font-size: 11px;
+}
+
+:root[data-density='compact'] .tower-ring-trial-option {
+  padding: 2px 4px;
+  gap: 4px;
+}
+
+:root[data-density='compact'] .tower-ring-trial-option input {
+  width: 15px;
+  height: 15px;
+  min-height: 15px;
+}
+
+:root[data-density='compact'] .tower-ring-card-options {
+  gap: 3px;
+  min-height: 24px;
+}
+
+:root[data-density='compact'] .tower-ring-trial-level-select + .custom-select {
+  width: 56px;
+}
+
+:root[data-density='compact'] .tower-ring-trial-level-slot {
+  width: 56px;
+  min-width: 56px;
+}
+
+:root[data-density='compact']
+  .tower-ring-trial-level-select
+  + .custom-select
+  .custom-select-trigger {
+  min-height: 22px;
+  padding: 2px 21px 2px 7px;
+  font-size: 10.5px;
+}
+
+:root[data-density='compact'] .tower-ring-settings-btn {
+  min-height: 24px;
+  padding: 2px 11px;
+  font-size: 11px;
+}
+
+:root[data-density='compact'] .tower-ring-card {
+  padding: 8px 9px;
+  border-color: rgba(220, 230, 248, 0.22);
+  /* 背景由 equipment.css 結果卡 surface token 統一供應；此處僅保留幾何與陰影 */
+  box-shadow:
+    0 7px 18px rgba(48, 45, 77, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+:root[data-density='compact'] .tower-ring-name {
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+:root[data-density='compact'] .tower-ring-name-main {
+  justify-content: flex-start;
+  margin-right: auto;
+}
+
+:root[data-density='compact'][data-theme='dark'] .tower-ring-card {
+  /* 背景由 equipment.css 結果卡 surface token 統一供應；此處僅深色陰影微調 */
+  box-shadow:
+    0 7px 18px rgba(20, 24, 48, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+:root[data-density='compact'] .tower-ring-row {
+  min-height: 26px;
+  padding: 3px 10px;
+}
+
+:root[data-density='compact'] .tower-ring-settings-dialog {
+  width: min(560px, calc(100vw - 28px));
+  padding: 13px;
+}
+
+:root[data-density='compact'] .tower-ring-average-hint {
+  padding-top: 4px;
+  font-size: 9.5px;
+}
+
+:root[data-density='compact'] .tower-ring-settings-summary,
+:root[data-density='compact'] .tower-ring-average-note {
+  font-size: 11px;
+}
+
+:root[data-density='compact'] .tower-ring-share-control input {
+  min-height: var(--density-control-h);
+}
+
+:root[data-density='compact'] .tower-ring-coverage-row,
+:root[data-density='compact'] .tower-ring-coverage-row--head {
+  height: 30px;
+  min-height: 30px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+:root[data-density='compact'] .tower-ring-coverage-control input {
+  height: 22px;
+  min-height: 22px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+/* ===== 萌獸終傷逐條面板：淡色版改用「選擇 Buff」浮層的粉彩玻璃底色 =====
+   元件預設深藍底在淡色（預設）緊湊主題下偏暗、與周圍卡片不協調；
+   dark 主題仍維持元件原本深色底，不覆寫。 */
+:root[data-density='compact']:not([data-theme='dark']) .fam-src-panel {
+  border-color: rgba(218, 230, 252, 0.34);
+  background:
+    radial-gradient(circle at 88% 4%, rgba(157, 139, 218, 0.2), transparent 32%),
+    linear-gradient(155deg, rgba(104, 111, 157, 0.97), rgba(61, 70, 112, 0.97));
+}
