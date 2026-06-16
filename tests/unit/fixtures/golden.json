@@ -342,7 +342,7 @@
           "value": 22557904375261
         },
         "effOutputNoBuff": 19097068740750.008,
-        "effOutputWithBuff": 110512364742099.72,
+        "effOutputWithBuff": 113749837636812.4,
         "equipmentDelta": {
           "baseMain": 0,
           "percentMain": 0,
@@ -406,7 +406,7 @@
           "effAtk": 420,
           "effBaseSubtwo": 30
         },
-        "effIgnoreFactor": 0.5733,
+        "effIgnoreFactor": 0.487305,
         "resolvedWeaponKey": "fortune",
         "weaponCorrectionResolved": 346,
         "weaponCorrectionGenesis": 252,
@@ -644,7 +644,7 @@
           "value": 29119115520946
         },
         "effOutputNoBuff": 27117839068855.734,
-        "effOutputWithBuff": 156927566365205.94,
+        "effOutputWithBuff": 161524778122697.5,
         "equipmentDelta": {
           "baseMain": 0,
           "percentMain": 0,
@@ -708,7 +708,7 @@
           "effAtk": 420,
           "effBaseSubtwo": 30
         },
-        "effIgnoreFactor": 0.5733,
+        "effIgnoreFactor": 0.487305,
         "resolvedWeaponKey": "arcane",
         "weaponCorrectionResolved": 39,
         "weaponCorrectionGenesis": 116,
@@ -948,7 +948,7 @@
           "low": 17650805422267
         },
         "effOutputNoBuff": 5249533601812.502,
-        "effOutputWithBuff": 30450830604286.324,
+        "effOutputWithBuff": 31342891315618.734,
         "equipmentDelta": {
           "baseMain": 0,
           "percentMain": 0,
@@ -1014,7 +1014,7 @@
           "effBaseSubtwo": 125,
           "effAtk": 420
         },
-        "effIgnoreFactor": 0.5733,
+        "effIgnoreFactor": 0.487305,
         "resolvedWeaponKey": "fortune",
         "weaponCorrectionResolved": 346,
         "weaponCorrectionGenesis": 252,
@@ -1254,7 +1254,7 @@
           "low": 16612332468251
         },
         "effOutputNoBuff": 5249533601812.502,
-        "effOutputWithBuff": 30450830604286.324,
+        "effOutputWithBuff": 31342891315618.734,
         "equipmentDelta": {
           "baseMain": 0,
           "percentMain": 0,
@@ -1320,7 +1320,7 @@
           "effBaseSubtwo": 125,
           "effAtk": 420
         },
-        "effIgnoreFactor": 0.5733,
+        "effIgnoreFactor": 0.487305,
         "resolvedWeaponKey": "genesis",
         "weaponCorrectionResolved": 252,
         "weaponCorrectionGenesis": 252,
@@ -1560,7 +1560,7 @@
           "low": 33606427665055
         },
         "effOutputNoBuff": 76968420950421.05,
-        "effOutputWithBuff": 444759502688061.1,
+        "effOutputWithBuff": 457788785320631.2,
         "equipmentDelta": {
           "baseMain": 0,
           "percentMain": 0,
@@ -1624,7 +1624,7 @@
           "effAtk": 420,
           "effBaseSubtwo": 30
         },
-        "effIgnoreFactor": 0.5733,
+        "effIgnoreFactor": 0.487305,
         "resolvedWeaponKey": "fortune",
         "weaponCorrectionResolved": 346,
         "weaponCorrectionGenesis": 252,
@@ -1862,7 +1862,7 @@
           "value": 20582857927243
         },
         "effOutputNoBuff": 19276065183375.008,
-        "effOutputWithBuff": 111590664567419.78,
+        "effOutputWithBuff": 114859726384014.56,
         "equipmentDelta": {
           "baseMain": 0,
           "percentMain": 0,
@@ -1927,7 +1927,7 @@
           "effBaseSubtwo": 125,
           "effAtk": 420
         },
-        "effIgnoreFactor": 0.5733,
+        "effIgnoreFactor": 0.487305,
         "resolvedWeaponKey": "absolab",
         "weaponCorrectionResolved": 23,
         "weaponCorrectionGenesis": 253,
@@ -2165,7 +2165,7 @@
           "value": 20108972895784
         },
         "effOutputNoBuff": 19097068740750.008,
-        "effOutputWithBuff": 110512364742099.72,
+        "effOutputWithBuff": 113749837636812.4,
         "equipmentDelta": {
           "baseMain": 0,
           "percentMain": 0,
@@ -2229,7 +2229,7 @@
           "effAtk": 420,
           "effBaseSubtwo": 30
         },
-        "effIgnoreFactor": 0.5733,
+        "effIgnoreFactor": 0.487305,
         "resolvedWeaponKey": "fafnir",
         "weaponCorrectionResolved": -184,
         "weaponCorrectionGenesis": 138,
@@ -2467,7 +2467,7 @@
           "value": 33159619022207
         },
         "effOutputNoBuff": 28072691595274.027,
-        "effOutputWithBuff": 162453179332670.7,
+        "effOutputWithBuff": 167212264580523.16,
         "equipmentDelta": {
           "baseMain": 0,
           "percentMain": 0,
@@ -2531,7 +2531,7 @@
           "effAtk": 420,
           "effBaseSubtwo": 30
         },
-        "effIgnoreFactor": 0.5733,
+        "effIgnoreFactor": 0.487305,
         "resolvedWeaponKey": "arcane",
         "weaponCorrectionResolved": 180,
         "weaponCorrectionGenesis": 252,
@@ -2769,7 +2769,7 @@
           "value": 30759878996030
         },
         "effOutputNoBuff": 28645603111125.01,
-        "effOutputWithBuff": 165768547113149.56,
+        "effOutputWithBuff": 170624756455218.6,
         "equipmentDelta": {
           "baseMain": 0,
           "percentMain": 0,
@@ -2833,7 +2833,7 @@
           "effAtk": 420,
           "effBaseSubtwo": 30
         },
-        "effIgnoreFactor": 0.5733,
+        "effIgnoreFactor": 0.487305,
         "resolvedWeaponKey": "arcane",
         "weaponCorrectionResolved": 136,
         "weaponCorrectionGenesis": 201,
@@ -3071,7 +3071,7 @@
           "value": 22557904375261
         },
         "effOutputNoBuff": 19097068740750.008,
-        "effOutputWithBuff": 110512364742099.72,
+        "effOutputWithBuff": 113749837636812.4,
         "equipmentDelta": {
           "baseMain": 70,
           "percentMain": 6,
@@ -3135,7 +3135,7 @@
           "effAtk": 420,
           "effBaseSubtwo": 30
         },
-        "effIgnoreFactor": 0.5733,
+        "effIgnoreFactor": 0.487305,
         "resolvedWeaponKey": "fortune",
         "weaponCorrectionResolved": 346,
         "weaponCorrectionGenesis": 252,
@@ -3373,7 +3373,7 @@
           "value": 23787846758375
         },
         "effOutputNoBuff": 19097068740750.008,
-        "effOutputWithBuff": 118620384705311.39,
+        "effOutputWithBuff": 122095383011066.95,
         "equipmentDelta": {
           "baseMain": 70,
           "percentMain": 6,
@@ -3437,7 +3437,7 @@
           "effAtk": 470,
           "effBaseSubtwo": 30
         },
-        "effIgnoreFactor": 0.5733,
+        "effIgnoreFactor": 0.487305,
         "resolvedWeaponKey": "fortune",
         "weaponCorrectionResolved": 346,
         "weaponCorrectionGenesis": 252,
@@ -3675,7 +3675,7 @@
           "value": 21403387642732
         },
         "effOutputNoBuff": 19097068740750.008,
-        "effOutputWithBuff": 109724247800149.67,
+        "effOutputWithBuff": 114111122482509.6,
         "equipmentDelta": {
           "baseMain": 70,
           "percentMain": 6,
@@ -3739,7 +3739,7 @@
           "effAtk": 470,
           "effBaseSubtwo": 30
         },
-        "effIgnoreFactor": 0.7384104,
+        "effIgnoreFactor": 0.6276488400000001,
         "resolvedWeaponKey": "arcane",
         "weaponCorrectionResolved": 7,
         "weaponCorrectionGenesis": 79,
@@ -3753,5 +3753,7 @@
       }
     }
   ],
-  "adjustments": ["2026-06-13: 賽伊蘭的靈藥與收藏家的靈藥改用完整數值。"]
+  "adjustments": [
+    "2026-06-13: 賽伊蘭的靈藥與收藏家的靈藥改用完整數值。"
+  ]
 }
