@@ -8,7 +8,7 @@
 
 到 [Releases](../../releases) 下載：
 
-- 可攜版 `MapleCombat-1.0.0.exe`：免安裝直接執行
+- 可攜版 `MapleCombat-x.x.x.exe`：免安裝直接執行
 - 安裝檔 `*-setup.exe`（NSIS）：建立開始選單捷徑、可由控制台移除
 
 ## 從原始碼建置
@@ -18,7 +18,7 @@
 ```bash
 npm ci
 npm run tauri build   # 產出可攜 .exe 與 NSIS 安裝檔於 src-tauri/target/release/
-npm run tauri dev     # 桌面版開發
+npm run tauri dev     # 開發
 npm run test          # 測試
 ```
 
