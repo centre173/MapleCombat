@@ -1,6 +1,6 @@
 [package]
 name = "maplecombat-app"
-version = "1.0.1"
+version = "1.0.2"
 description = "新楓之谷戰鬥力計算機"
 edition = "2021"
 

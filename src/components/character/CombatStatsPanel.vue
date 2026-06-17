@@ -188,19 +188,13 @@ const ruinFinalOptions = [
           <span class="buff-info weapon-correction-info">
             <button type="button" class="buff-info-trigger" aria-label="武器攻擊校正資訊"></button>
             <span class="buff-info-tooltip weapon-correction-tooltip" role="tooltip">
-              <span class="buff-info-title">武器攻擊校正</span>
               <span class="buff-info-list weapon-correction-list">
                 <span class="buff-info-row">
-                  <span class="buff-info-name">基準武器攻擊</span>
-                  <span id="weaponCorrectionBaseAtk" class="buff-info-value">{{
-                    store.weaponCorrection.totalAtk
-                  }}</span>
-                </span>
-                <span class="buff-info-row">
-                  <span class="buff-info-name">攻擊校正</span>
-                  <span id="weaponCorrectionValue" class="buff-info-value">{{
-                    store.weaponCorrection.correction
-                  }}</span>
+                    <span class="buff-info-name">
+                        武器總攻擊：含星火不含潛能 <br />
+                        活動Buff：多個同時存在需加總 <br />
+                        P寵攻擊：Set技能所加的攻擊 <br />
+                    </span>
                 </span>
               </span>
             </span>
@@ -225,7 +219,7 @@ const ruinFinalOptions = [
               <CustomSelect id="flameLevel" :options="flameLevelOptions" />
             </div>
             <div class="st-cell">
-              <span class="st-cell-label">武器攻擊</span><StatInput id="currentWeaponAtk" min="0" />
+              <span class="st-cell-label">武器總攻擊</span><StatInput id="currentWeaponAtk" min="0" />
             </div>
             <div v-show="!hideSubFields" id="dynamicFieldsRow" class="st-cell">
               <span class="st-cell-label">卷軸攻擊總和</span><StatInput id="scrollAtk" />
