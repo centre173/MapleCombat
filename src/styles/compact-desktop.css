@@ -19,7 +19,7 @@
   --density-fs-base: 12px;
   --density-fs-small: 11px;
   --density-fs-title: 13px;
-  --compact-toolbar-h: 32px;
+  --compact-toolbar-h: 64px;
 
   /* 間距/字級縮小；圓角縮小但保持柔和（不做方框） */
   --space-2: 5px;
@@ -236,11 +236,12 @@ html:root[data-density='compact'][data-theme='dark'] {
   align-self: stretch;
   width: calc(100% + 2 * var(--page-gutter));
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
   height: var(--compact-toolbar-h);
   margin: 0 calc(-1 * var(--page-gutter));
-  padding: 0 var(--page-gutter);
+  padding: 4px var(--page-gutter) 5px;
 }
 
 /* Header 自己持有單一實底，不依賴背景模糊或下方內容合成。 */
@@ -251,17 +252,32 @@ html:root[data-density='compact'][data-theme='dark'] {
   z-index: -1;
   pointer-events: none;
   background: linear-gradient(180deg, #66739b, #59658d);
-  box-shadow: 0 1px 0 rgba(220, 232, 255, 0.14);
+  box-shadow:
+    inset 0 -1px 0 rgba(223, 234, 255, 0.16),
+    0 3px 10px rgba(48, 59, 99, 0.12);
 }
 
 :root[data-density='compact'][data-theme='dark'] .compact-toolbar::before {
   background: linear-gradient(180deg, #313b61, #283253);
 }
 
+:root[data-density='compact'] .ct-main-row,
+:root[data-density='compact'] .ct-state-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+:root[data-density='compact'] .ct-state-row {
+  min-height: 25px;
+}
+
 :root[data-density='compact'] .ct-tabs {
   display: flex;
   align-items: center;
   gap: 3px;
+  min-width: 0;
 }
 
 :root[data-density='compact'] .ct-tab {
@@ -285,12 +301,12 @@ html:root[data-density='compact'][data-theme='dark'] {
 :root[data-density='compact'] .ct-tab.active {
   color: #ffffff;
   background:
-    radial-gradient(circle at 82% 22%, rgba(255, 255, 255, 0.22), transparent 42%),
+    radial-gradient(circle at 82% 22%, rgba(255, 255, 255, 0.26), transparent 42%),
     linear-gradient(135deg, rgba(120, 183, 235, 0.96), rgba(126, 150, 218, 0.9));
-  border-color: rgba(214, 232, 255, 0.3);
+  border-color: rgba(224, 239, 255, 0.38);
   box-shadow:
-    0 4px 12px rgba(67, 109, 169, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    0 4px 11px rgba(67, 109, 169, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26);
   text-shadow: 0 2px 4px rgba(42, 67, 115, 0.32);
 }
 
@@ -299,6 +315,277 @@ html:root[data-density='compact'][data-theme='dark'] {
   align-items: center;
   gap: 4px;
   margin-left: auto;
+}
+
+:root[data-density='compact'] .ct-state-tabs {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+:root[data-density='compact'] .ct-state-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+:root[data-density='compact'] .ct-state-tab,
+:root[data-density='compact'] .ct-state-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  max-width: 86px;
+  padding: 2px 9px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: rgba(235, 242, 255, 0.7);
+  background: transparent;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+:root[data-density='compact'] .ct-state-tab:hover,
+:root[data-density='compact'] .ct-state-menu-trigger:hover {
+  color: #fff;
+  background: rgba(212, 232, 255, 0.12);
+}
+
+:root[data-density='compact'] .ct-state-tab.active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(111, 183, 207, 0.72), rgba(126, 136, 207, 0.66));
+  border-color: rgba(214, 232, 255, 0.24);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+:root[data-density='compact'] .ct-state-tab--weighted.active {
+  background: linear-gradient(135deg, rgba(203, 148, 92, 0.76), rgba(146, 120, 204, 0.7));
+}
+
+:root[data-density='compact'] .ct-state-menu {
+  position: relative;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+:root[data-density='compact'] .ct-state-menu > summary {
+  list-style: none;
+}
+
+:root[data-density='compact'] .ct-state-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+:root[data-density='compact'] .ct-state-menu-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 900;
+  display: grid;
+  gap: 4px;
+  width: 154px;
+  padding: 6px;
+  border: 1px solid rgba(220, 232, 255, 0.24);
+  border-radius: 10px;
+  background: rgba(42, 51, 88, 0.98);
+  box-shadow: 0 14px 32px rgba(12, 18, 38, 0.34);
+}
+
+:root[data-density='compact'] .ct-state-menu-panel button {
+  min-height: 25px;
+  border: 0;
+  border-radius: 7px;
+  color: rgba(240, 246, 255, 0.92);
+  background: transparent;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+}
+
+:root[data-density='compact'] .ct-state-menu-panel button:hover:not(:disabled) {
+  background: rgba(126, 180, 235, 0.16);
+}
+
+:root[data-density='compact'] .ct-state-menu-panel button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+:root[data-density='compact'] .ct-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(18, 24, 48, 0.38);
+  backdrop-filter: blur(5px);
+}
+
+:root[data-density='compact'] .ct-dialog {
+  width: min(330px, calc(100vw - 32px));
+  padding: 12px;
+  border: 1px solid rgba(220, 232, 255, 0.24);
+  border-radius: 13px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.035)),
+    rgba(62, 72, 112, 0.96);
+  box-shadow:
+    0 18px 44px rgba(12, 18, 38, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.13);
+  color: rgba(242, 247, 255, 0.94);
+}
+
+:root[data-density='compact'][data-theme='dark'] .ct-dialog {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+    rgba(38, 48, 86, 0.98);
+}
+
+:root[data-density='compact'] .ct-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+:root[data-density='compact'] .ct-dialog-head strong {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+:root[data-density='compact'] .ct-dialog-close {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  color: rgba(242, 247, 255, 0.9);
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+:root[data-density='compact'] .ct-dialog p {
+  margin: 8px 0 10px;
+  color: rgba(228, 238, 252, 0.76);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+:root[data-density='compact'] .ct-dialog-field {
+  display: grid;
+  gap: 5px;
+  color: rgba(228, 238, 252, 0.8);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+:root[data-density='compact'] .ct-dialog-field input {
+  width: 100%;
+  height: 30px;
+  padding: 4px 9px;
+}
+
+:root[data-density='compact'] .ct-dialog-name-grid {
+  display: grid;
+  gap: 6px;
+}
+
+:root[data-density='compact'] .ct-dialog-name-row {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  color: rgba(228, 238, 252, 0.82);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+:root[data-density='compact'] .ct-dialog-name-row span {
+  white-space: nowrap;
+}
+
+:root[data-density='compact'] .ct-dialog-name-row input {
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  padding: 4px 9px;
+}
+
+:root[data-density='compact'] .ct-dialog-state-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+}
+
+:root[data-density='compact'] .ct-dialog-state-grid button {
+  min-width: 0;
+  min-height: 30px;
+  padding: 3px 5px;
+  border: 1px solid rgba(220, 232, 255, 0.16);
+  border-radius: 8px;
+  color: rgba(238, 246, 255, 0.88);
+  background: rgba(20, 28, 54, 0.22);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 850;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+:root[data-density='compact'] .ct-dialog-state-grid button.active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(123, 202, 219, 0.88), rgba(138, 148, 222, 0.84));
+  border-color: rgba(214, 232, 255, 0.34);
+}
+
+:root[data-density='compact'] .ct-dialog-state-grid button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+:root[data-density='compact'] .ct-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+:root[data-density='compact'] .ct-dialog-actions button {
+  min-height: 28px;
+  padding: 4px 12px;
+  border: 1px solid rgba(220, 232, 255, 0.18);
+  border-radius: 999px;
+  color: rgba(242, 247, 255, 0.92);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+:root[data-density='compact'] .ct-dialog-actions button:disabled {
+  opacity: 0.48;
+  cursor: default;
+}
+
+:root[data-density='compact'] .ct-dialog-secondary {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-density='compact'] .ct-dialog-primary {
+  background: linear-gradient(135deg, rgba(120, 183, 235, 0.92), rgba(126, 150, 218, 0.88));
 }
 
 :root[data-density='compact'] .ct-btn {
@@ -558,6 +845,15 @@ html:root[data-density='compact'][data-theme='dark'] {
   border-bottom: 1px solid var(--web-line, var(--border-color));
 }
 
+:root[data-density='compact'] .stat-card-head-mode-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
 :root[data-density='compact'] .stat-card-head .mode-tabs {
   width: 100%;
   min-width: 0;
@@ -565,8 +861,69 @@ html:root[data-density='compact'][data-theme='dark'] {
 }
 
 :root[data-density='compact'] .stat-card-head .mode-tab {
+  display: grid;
+  place-items: center;
   padding: 3px 12px;
   font-size: 12px;
+}
+
+:root[data-density='compact'] .stat-card-head .mode-tab-main {
+  grid-area: 1 / 1;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-density='compact'] .stat-card-head .mode-tab-badge {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  max-width: 54px;
+  padding: 1px 5px;
+  border: 1px solid rgba(220, 232, 255, 0.18);
+  border-radius: 999px;
+  color: rgba(236, 245, 255, 0.78);
+  background: rgba(20, 28, 54, 0.16);
+  font-size: 9.5px;
+  font-weight: 850;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+:root[data-density='compact'] .stat-card-head .mode-tab.active .mode-tab-badge {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+:root[data-density='compact'] .character-data-help {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:root[data-density='compact'] .character-data-help .buff-info-trigger {
+  flex: 0 0 auto;
+}
+
+:root[data-density='compact'] .character-data-help .character-data-help-tooltip {
+  top: calc(100% + 7px);
+  left: auto;
+  right: 0;
+  width: min(280px, calc(100vw - 32px));
+  max-width: min(280px, calc(100vw - 32px));
+  max-height: none;
+  overflow: visible;
+  line-height: 1.45;
+  text-align: left;
+  overflow-wrap: break-word;
+  z-index: 620;
 }
 
 :root[data-density='compact'] .stat-card-head-controls {
@@ -768,7 +1125,8 @@ html:root[data-density='compact'][data-theme='dark'] {
 }
 
 :root[data-density='compact'] .weapon-correction-tooltip .buff-info-name,
-:root[data-density='compact'] .weapon-correction-tooltip .buff-info-value {
+:root[data-density='compact'] .weapon-correction-tooltip .buff-info-value,
+:root[data-density='compact'] .weapon-correction-tooltip .buff-info-line {
   white-space: nowrap;
   overflow-wrap: normal;
 }
@@ -1003,6 +1361,14 @@ html:root[data-density='compact'][data-theme='dark'] {
 
 :root[data-density='compact'] .buff-quick-count strong {
   font-size: 12px;
+}
+
+:root[data-density='compact'] .buff-quick-all:focus-visible {
+  outline: 0;
+  border-color: rgba(188, 226, 255, 0.5);
+  box-shadow:
+    0 0 0 2px rgba(145, 207, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 :root[data-density='compact'] .buff-quick-count::after,
@@ -1321,7 +1687,7 @@ html:root[data-density='compact'][data-theme='dark'] {
 /* 裝備欄位改為「標籤｜輸入框」橫排，高度減半 */
 :root[data-density='compact'] .equipment-grid .section > .input-group {
   display: grid;
-  grid-template-columns: minmax(64px, 0.8fr) minmax(0, 1.2fr);
+  grid-template-columns: minmax(54px, 1fr) minmax(78px, 92px);
   align-items: center;
   gap: 5px;
   width: 100%;
@@ -1337,6 +1703,7 @@ html:root[data-density='compact'][data-theme='dark'] {
 :root[data-density='compact'] .equipment-grid .section > .input-group select {
   min-height: var(--density-control-h);
   width: 100%;
+  min-width: 0;
   max-width: none;
   justify-self: stretch;
 }
@@ -1437,6 +1804,7 @@ html:root[data-density='compact'][data-theme='dark'] {
 /* 傷害說明 tooltip：文字短，取消內部 max-height/捲軸（仿 main-stat-guide-tooltip）；
    寬度依內容收縮（蓋過 :root[data-density=compact] .buff-info-tooltip 的固定 width）。 */
 :root[data-density='compact'] .st-cell--info .dmg-bug-info .buff-info-tooltip {
+  top: calc(100% + 12px);
   width: min(260px, calc(100vw - 32px));
   max-height: none;
   overflow: visible;
@@ -1979,7 +2347,7 @@ html:root[data-density='compact'][data-theme='dark'] {
 
 /* 變更後戰鬥力差值字級配合 22px 主數值 */
 :root[data-density='compact'] .equipment-result-diff {
-  font-size: 13px;
+  font-size: 15px;
 }
 
 /* 數值換算：外層改為接近裝備頁的灰紫玻璃，內層結果列維持深色對比。 */
@@ -2154,6 +2522,197 @@ html:root[data-density='compact'][data-theme='dark'] {
   min-height: 22px;
   padding-top: 1px;
   padding-bottom: 1px;
+}
+
+/* ===== 19. 五狀態加權頁 ===== */
+:root[data-density='compact'] .weighted-analysis-view {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding-bottom: 10px;
+}
+
+:root[data-density='compact'] .weighted-card {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid rgba(220, 232, 255, 0.18);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.028)),
+    rgba(82, 91, 132, 0.62);
+  box-shadow:
+    0 8px 20px rgba(31, 34, 67, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+:root[data-density='compact'][data-theme='dark'] .weighted-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018)),
+    rgba(45, 54, 92, 0.76);
+}
+
+:root[data-density='compact'] .weighted-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 7px;
+}
+
+:root[data-density='compact'] .weighted-head h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+:root[data-density='compact'] .weighted-head p {
+  margin: 2px 0 0;
+  color: rgba(228, 238, 252, 0.72);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+:root[data-density='compact'] .weighted-info {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+:root[data-density='compact'] .weighted-info .buff-info-trigger {
+  width: 15px;
+  height: 15px;
+}
+
+:root[data-density='compact'] .weighted-info-tooltip {
+  left: 0;
+  right: auto;
+  top: calc(100% + 8px);
+  z-index: 950;
+  width: min(260px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  max-height: none;
+  overflow: visible;
+}
+
+:root[data-density='compact'] .weighted-weight-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+}
+
+:root[data-density='compact'] .weighted-weight-item {
+  display: grid;
+  grid-template-columns: minmax(4.6em, 1fr) 38px auto;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  min-height: 28px;
+  padding: 3px 5px;
+  border: 1px solid rgba(220, 232, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(20, 28, 54, 0.2);
+  color: rgba(238, 246, 255, 0.9);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+:root[data-density='compact'] .weighted-weight-item span {
+  min-width: 4.6em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-density='compact'] .weighted-weight-item input {
+  height: 22px;
+  min-height: 22px;
+  padding: 1px 4px;
+  text-align: center;
+}
+
+:root[data-density='compact'] .weighted-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+
+:root[data-density='compact'] .weighted-summary-item {
+  min-width: 0;
+  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding: 7px 9px;
+  border: 1px solid rgba(220, 232, 255, 0.14);
+  border-radius: 9px;
+  background: rgba(19, 27, 55, 0.22);
+}
+
+:root[data-density='compact'] .weighted-summary-item span {
+  color: rgba(224, 236, 250, 0.76);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+:root[data-density='compact'] .weighted-summary-item strong {
+  color: #b9efff;
+  font-size: 17px;
+  font-weight: 950;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-density='compact'] .weighted-summary-subvalue {
+  min-height: 12px;
+  color: rgba(224, 236, 250, 0.68);
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-density='compact'] .weighted-section-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 7px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+:root[data-density='compact'] .weighted-equipment-result {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+:root[data-density='compact'] .weighted-equipment-grid {
+  margin-top: 0;
+}
+
+:root[data-density='compact'] .weighted-efficiency-toolbar {
+  margin-bottom: 7px;
+}
+
+@media (max-width: 760px) {
+  :root[data-density='compact'] .weighted-weight-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  :root[data-density='compact'] .weighted-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* ===== 萌獸終傷逐條面板：淡色版改用「選擇 Buff」浮層的粉彩玻璃底色 =====

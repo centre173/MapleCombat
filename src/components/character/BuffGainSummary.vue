@@ -60,7 +60,9 @@ watch([displayText, subvalueText], () => queueCombatPowerFit())
           aria-label="含 Buff 戰力增幅說明"
         ></button>
         <span class="buff-info-tooltip" role="tooltip">
-            將原戰鬥力公式未計入的「全職業共通技能/Buff」算入戰鬥力公式的結果
+          <span class="buff-info-lines">
+            <span class="buff-info-line">將傳授、共通技能與Buff等計入戰鬥力公式的變化</span>
+          </span>
         </span>
       </span>
       <span class="result-label">{{

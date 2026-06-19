@@ -781,15 +781,12 @@ input:disabled {
 
 /* 此儲存格在傷害列最左側，tooltip 以左緣對齊往右展開即可完整顯示、不溢出。 */
 .st-cell--info .dmg-bug-info .buff-info-tooltip {
+  top: calc(100% + 12px);
   width: min(260px, calc(100vw - 32px));
   max-height: none;
   overflow: visible;
-  /* 標籤的 white-space:nowrap / 小字級 / 粗體會被繼承，這裡一併覆寫回標準 tooltip 字體，
-     與右上結果 tooltip 一致（兩者本應同為 body 預設字，差別只因此處巢狀在小標籤內）。 */
+  /* 標籤的 white-space:nowrap 會被繼承，這裡覆寫回標準 tooltip 排版。 */
   white-space: normal;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.45;
 }
 
 .bonus-extra-grid {

@@ -3,6 +3,7 @@ import { nextTick, onBeforeUnmount, onMounted, ref, type CSSProperties } from 'v
 import { useBuffsStore } from '@/stores/buffs'
 import { useUiStore } from '@/stores/ui'
 import BuffPanel from './BuffPanel.vue'
+import SoulOrbControl from './SoulOrbControl.vue'
 
 const props = defineProps<{
   panelId: string
@@ -139,6 +140,10 @@ onBeforeUnmount(() => {
         </header>
 
         <div class="buff-overlay-body">
+          <section class="buff-overlay-soul-orb">
+            <span class="buff-section-title">靈魂寶珠</span>
+            <SoulOrbControl />
+          </section>
           <BuffPanel mode="eff" embedded :panel-id="panelId" />
         </div>
       </section>

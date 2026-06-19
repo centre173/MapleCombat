@@ -8,8 +8,8 @@
 
 到 [Releases](../../releases) 下載：
 
-- 可攜版 `MapleCombat-x.x.x.exe`：免安裝直接執行
-- 安裝檔 `*-setup.exe`（NSIS）：建立開始選單捷徑、可由控制台移除
+- 可攜版 `MapleCombat-x.x.x.exe`：免安裝，下載後可直接執行。
+- 安裝檔 `*-setup.exe`（NSIS）：安裝後會建立開始選單捷徑，也可從控制台移除。
 
 ## 從原始碼建置
 

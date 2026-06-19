@@ -79,12 +79,16 @@ jobs:
           prerelease: false
           generate_release_notes: true
           body: |
-            新楓之谷戰鬥力計算機（MapleCombat）${{ steps.ver.outputs.tag }}
+            ### 新楓之谷戰鬥力計算機（MapleCombat）${{ steps.ver.outputs.tag }}
+            
+            新楓之谷戰鬥力計算機，適用於 Windows 10 / 11。
 
             ## 下載
-            - 可攜版 `MapleCombat-${{ steps.ver.outputs.version }}.exe`：免安裝，下載直接執行。
-            - 安裝檔 `MapleCombat-${{ steps.ver.outputs.version }}-setup-x64.exe`（NSIS）：安裝後建立開始選單捷徑，可由控制台移除。
 
-          files: |
-            src-tauri/target/release/MapleCombat-${{ steps.ver.outputs.version }}-setup-x64.exe
-            src-tauri/target/release/MapleCombat-${{ steps.ver.outputs.version }}.exe
+            * 可攜版 [MapleCombat-${{ steps.ver.outputs.version }}.exe](https://github.com/${{ github.repository }}/releases/download/${{ steps.ver.outputs.tag }}/MapleCombat-${{ steps.ver.outputs.version }}.exe)：免安裝，下載後可直接執行。
+            * 安裝檔 [MapleCombat-${{ steps.ver.outputs.version }}-setup-x64.exe](https://github.com/${{ github.repository }}/releases/download/${{ steps.ver.outputs.tag }}/MapleCombat-${{ steps.ver.outputs.version }}-setup-x64.exe)（NSIS）：安裝後會建立開始選單捷徑，也可從控制台移除。
+
+            ## 更新內容 
+
+            * 新增「多狀態加權計算」功能，可輸入不同狀態占比計算平均效益，方便綜合估算爆發、常駐等情境
+            

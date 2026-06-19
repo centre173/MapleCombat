@@ -309,6 +309,26 @@
   backdrop-filter: none;
 }
 
+.buff-overlay-soul-orb {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px;
+  border: 1px solid rgba(220, 232, 255, 0.14);
+  border-radius: 12px;
+  background: rgba(20, 28, 54, 0.18);
+}
+
+.buff-overlay-soul-orb .buff-section-title {
+  width: fit-content;
+  padding-bottom: 4px;
+}
+
+.buff-overlay-soul-orb .buff-soul-orb-control {
+  width: min(100%, 360px);
+  max-width: 100%;
+}
+
 .buff-panel--embedded .buff-head {
   justify-content: flex-end;
   padding-bottom: 7px;
@@ -462,6 +482,22 @@
 
 .buff-pass-info .buff-info-list {
   grid-template-columns: 1fr;
+}
+
+.buff-info-lines {
+  display: grid;
+  gap: 4px;
+}
+
+.buff-info-line {
+  display: block;
+  min-width: 0;
+  color: rgba(237, 246, 255, 0.86);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.28;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .buff-info-list {

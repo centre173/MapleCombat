@@ -28,6 +28,7 @@ import {
   type BuffComputeContext,
 } from '@/core/buffs/delta'
 import { normalizeSavedData, type SaveDataV1 } from '@/services/saveData'
+import { useStateSlotsStore, type WorkspaceSlotId } from './stateSlots'
 
 // 戰鬥力資料 ↔ 實戰資料 欄位對應
 const combatToEffFieldMap: Record<string, string> = {
@@ -53,6 +54,7 @@ const combatToEffFieldMap: Record<string, string> = {
 
 export const useCharacterStore = defineStore('character', () => {
   const buffs = useBuffsStore()
+  const slots = useStateSlotsStore()
 
   runStorageMigrations()
 
@@ -218,6 +220,7 @@ export const useCharacterStore = defineStore('character', () => {
     if (!def) return
     fields[id] = value
     persistField(id, value)
+    slots.saveField(id, value)
     if (id === 'weaponSet') handleWeaponChange(true)
   }
 
@@ -229,14 +232,17 @@ export const useCharacterStore = defineStore('character', () => {
       setKey = 'fortune'
       fields.weaponSet = setKey
       persistField('weaponSet', setKey)
+      slots.saveField('weaponSet', setKey)
     }
     const setData = db[setKey as WeaponSetKey]
     if (shouldResetDefaults) {
       fields.scrollAtk = String(setData.defaultScroll)
       persistField('scrollAtk', fields.scrollAtk)
+      slots.saveField('scrollAtk', fields.scrollAtk)
       if (setData.hideSubFields) {
         fields.starCount = '22'
         persistField('starCount', '22')
+        slots.saveField('starCount', '22')
       }
     }
     syncGenesisFinalFromWeaponSet()
@@ -247,6 +253,7 @@ export const useCharacterStore = defineStore('character', () => {
     const shouldApply = setKey === 'fortune' || setKey === 'genesis'
     fields.genesisFinalCheck = shouldApply
     persistField('genesisFinalCheck', shouldApply)
+    slots.saveField('genesisFinalCheck', shouldApply)
   }
 
   // ── 職業切換 ──
@@ -258,6 +265,11 @@ export const useCharacterStore = defineStore('character', () => {
     localStorage.setItem('selectedJob', job.category)
     localStorage.setItem('selectedJobName', job.name)
     localStorage.setItem('effSelectedJob', job.category)
+    slots.saveSharedJob({
+      selectedJob: job.category,
+      selectedJobName: job.name,
+      effSelectedJob: job.category,
+    })
     syncGenesisFinalFromWeaponSet()
   }
 
@@ -267,6 +279,7 @@ export const useCharacterStore = defineStore('character', () => {
       if (!(srcId in fields) || !(destId in fields)) return
       fields[destId] = fields[srcId]
       persistField(destId, fields[destId])
+      slots.saveField(destId, fields[destId])
     })
   }
 
@@ -283,24 +296,39 @@ export const useCharacterStore = defineStore('character', () => {
 
   // ── 匯出/匯入 ──
   function collectSaveData(): SaveDataV1 {
+    slots.saveRuntimeSnapshot(
+      fields,
+      {
+        selectedJob: selectedJob.value,
+        selectedJobName: selectedJobName.value,
+        effSelectedJob: effSelectedJob.value,
+      },
+      buffs.collectState(),
+    )
     const values: Record<string, unknown> = {}
     fieldDefs.forEach((def) => {
       values[def.id] = fields[def.id]
     })
     return {
       app: 'maplecombat',
-      version: 1,
+      version: 2,
       savedAt: new Date().toISOString(),
       selectedJob: selectedJob.value,
       selectedJobName: selectedJobName.value,
       effSelectedJob: effSelectedJob.value,
       values,
       buffState: buffs.collectState(),
+      workspace: slots.exportWorkspace(),
     }
   }
 
   function applySaveData(raw: unknown): void {
     const saveData = normalizeSavedData(raw)
+
+    if (saveData.workspace && slots.importWorkspace(saveData.workspace)) {
+      applyWorkspaceSlot(slots.workspace.activeSlot)
+      return
+    }
 
     fieldDefs.forEach((def) => {
       if (!Object.prototype.hasOwnProperty.call(saveData.values, def.id)) return
@@ -329,7 +357,83 @@ export const useCharacterStore = defineStore('character', () => {
     }
 
     handleWeaponChange(false)
+    slots.saveRuntimeSnapshot(
+      fields,
+      {
+        selectedJob: selectedJob.value,
+        selectedJobName: selectedJobName.value,
+        effSelectedJob: effSelectedJob.value,
+      },
+      buffs.collectState(),
+    )
   }
+
+  function coerceWorkspaceField(id: string, value: string | boolean): string | boolean {
+    const def = fieldDefById[id]
+    if (!def) return value
+    if (def.kind === 'checkbox') return value === true || value === 'true'
+    if (def.kind === 'select' && def.options && !def.options.includes(String(value))) return def.default
+    return String(value ?? '')
+  }
+
+  function applyWorkspaceSlot(slot: WorkspaceSlotId): void {
+    const values = slots.snapshotValues(slot)
+    fieldDefs.forEach((def) => {
+      const value = coerceWorkspaceField(def.id, values[def.id] ?? slots.fieldDefault(def.id))
+      fields[def.id] = value
+      persistField(def.id, value)
+    })
+
+    const job =
+      getJobByName(slots.workspace.shared.selectedJobName) ||
+      getDefaultJobByCategory(slots.workspace.shared.selectedJob)
+    selectedJob.value = job.category
+    selectedJobName.value = job.name
+    effSelectedJob.value = job.category
+    localStorage.setItem('selectedJob', job.category)
+    localStorage.setItem('selectedJobName', job.name)
+    localStorage.setItem('effSelectedJob', job.category)
+
+    if (slot !== 'weighted') {
+      const state = slots.workspace.states.find((entry) => entry.id === slot)
+      if (state?.buffState) buffs.applyState(state.buffState)
+      else {
+        buffs.resetDefaults()
+        buffs.applyState({ master: true, levels: {}, soulOrb: { value: 0, stat: 'percentStr' } })
+      }
+    }
+
+    handleWeaponChange(false)
+  }
+
+  function activateWorkspaceSlot(slot: WorkspaceSlotId): void {
+    slots.saveRuntimeSnapshot(
+      fields,
+      {
+        selectedJob: selectedJob.value,
+        selectedJobName: selectedJobName.value,
+        effSelectedJob: effSelectedJob.value,
+      },
+      buffs.collectState(),
+    )
+    slots.setActiveSlot(slot)
+    applyWorkspaceSlot(slot)
+  }
+
+  function reloadWorkspaceSlot(slot: WorkspaceSlotId = slots.workspace.activeSlot): void {
+    applyWorkspaceSlot(slot)
+  }
+
+  slots.ensureInitialized(
+    fields,
+    {
+      selectedJob: selectedJob.value,
+      selectedJobName: selectedJobName.value,
+      effSelectedJob: effSelectedJob.value,
+    },
+    buffs.collectState(),
+  )
+  applyWorkspaceSlot(slots.workspace.activeSlot)
 
   return {
     fields,
@@ -365,6 +469,8 @@ export const useCharacterStore = defineStore('character', () => {
     copyEffDataToCombat,
     collectSaveData,
     applySaveData,
+    activateWorkspaceSlot,
+    reloadWorkspaceSlot,
     powerValue,
   }
 })

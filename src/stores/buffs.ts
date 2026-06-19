@@ -12,6 +12,7 @@ import {
   type SoulOrbState,
 } from '@/core/buffs/delta'
 import { buffTableText } from '@/data/buffSource'
+import { useStateSlotsStore } from './stateSlots'
 
 export interface BuffExportState {
   master: boolean
@@ -26,6 +27,7 @@ function isValidSoulOrbStat(stat: unknown): stat is string {
 }
 
 export const useBuffsStore = defineStore('buffs', () => {
+  const slots = useStateSlotsStore()
   const table = parseBuffTable(buffTableText)
 
   // 還原狀態：預設 → 套用 localStorage
@@ -123,13 +125,27 @@ export const useBuffsStore = defineStore('buffs', () => {
     /* ignore */
   }
 
-  watch(state, () => localStorage.setItem('buffState', JSON.stringify(state)), { deep: true })
+  watch(
+    state,
+    () => {
+      localStorage.setItem('buffState', JSON.stringify(state))
+      slots.saveBuffForActive(collectState())
+    },
+    { deep: true },
+  )
   watch(
     preferredLevels,
     () => localStorage.setItem(PREFERRED_LEVELS_KEY, JSON.stringify(preferredLevels)),
     { deep: true },
   )
-  watch(soulOrb, () => localStorage.setItem('buffSoulOrb', JSON.stringify(soulOrb)), { deep: true })
+  watch(
+    soulOrb,
+    () => {
+      localStorage.setItem('buffSoulOrb', JSON.stringify(soulOrb))
+      slots.saveBuffForActive(collectState())
+    },
+    { deep: true },
+  )
 
   const matchesDefault = computed(() => {
     const defaults = defaultBuffState(table)

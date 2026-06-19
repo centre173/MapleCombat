@@ -188,14 +188,10 @@ const ruinFinalOptions = [
           <span class="buff-info weapon-correction-info">
             <button type="button" class="buff-info-trigger" aria-label="武器攻擊校正資訊"></button>
             <span class="buff-info-tooltip weapon-correction-tooltip" role="tooltip">
-              <span class="buff-info-list weapon-correction-list">
-                <span class="buff-info-row">
-                    <span class="buff-info-name">
-                        武器總攻擊：含星火不含潛能 <br />
-                        活動Buff：多個同時存在需加總 <br />
-                        P寵攻擊：Set技能所加的攻擊 <br />
-                    </span>
-                </span>
+              <span class="buff-info-lines weapon-correction-list">
+                <span class="buff-info-line">武器總攻擊：含星火不含潛能</span>
+                <span class="buff-info-line">活動Buff：多個同時存在需加總</span>
+                <span class="buff-info-line">P寵攻擊：Set技能所加的攻擊</span>
               </span>
             </span>
           </span>

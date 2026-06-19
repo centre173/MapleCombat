@@ -4,11 +4,13 @@
 import { ref } from 'vue'
 import { useUiStore, type CalculatorMode } from '@/stores/ui'
 import { useCharacterStore } from '@/stores/character'
+import { useStateSlotsStore } from '@/stores/stateSlots'
 import JobCombobox from './JobCombobox.vue'
 import StatPreviewDialog from './StatPreviewDialog.vue'
 
 const ui = useUiStore()
 const store = useCharacterStore()
+const slots = useStateSlotsStore()
 
 const copiedButton = ref<'eff' | 'combat' | null>(null)
 const previewOpen = ref(false)
@@ -39,23 +41,36 @@ function switchMode(mode: CalculatorMode) {
 
 <template>
   <div class="stat-card-head">
-    <div class="mode-tabs">
-      <button
-        class="mode-tab"
-        :class="{ active: ui.calculatorMode === 'calculator' }"
-        data-mode="calculator"
-        @click="switchMode('calculator')"
-      >
-        戰鬥力資料
-      </button>
-      <button
-        class="mode-tab"
-        :class="{ active: ui.calculatorMode === 'effStats' }"
-        data-mode="effStats"
-        @click="switchMode('effStats')"
-      >
-        實戰資料
-      </button>
+    <div class="stat-card-head-mode-row">
+      <div class="mode-tabs">
+        <button
+          class="mode-tab"
+          :class="{ active: ui.calculatorMode === 'calculator' }"
+          data-mode="calculator"
+          @click="switchMode('calculator')"
+        >
+          <span class="mode-tab-main">戰鬥力資料</span>
+          <span class="mode-tab-badge">共用</span>
+        </button>
+        <button
+          class="mode-tab"
+          :class="{ active: ui.calculatorMode === 'effStats' }"
+          data-mode="effStats"
+          @click="switchMode('effStats')"
+        >
+          <span class="mode-tab-main">實戰資料</span>
+          <span class="mode-tab-badge" :title="slots.activeLabel">{{ slots.activeLabel }}</span>
+        </button>
+      </div>
+      <span class="buff-info character-data-help">
+        <button type="button" class="buff-info-trigger" aria-label="資料用途說明"></button>
+        <span class="buff-info-tooltip character-data-help-tooltip" role="tooltip">
+          <span class="buff-info-lines">
+            <span class="buff-info-line">戰鬥力資料：多狀態共用，影響戰鬥力相關計算</span>
+            <span class="buff-info-line">實戰資料：各狀態獨立，影響實際增幅相關計算</span>
+          </span>
+        </span>
+      </span>
     </div>
     <div class="stat-card-head-controls">
       <div class="stat-card-head-job">

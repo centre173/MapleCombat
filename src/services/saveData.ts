@@ -2,6 +2,7 @@
 import { fieldDefs } from '@/constants/fields'
 import { isTauri, saveExportFile } from './tauri'
 import type { BuffExportState } from '@/stores/buffs'
+import type { CompactStateWorkspaceV1 } from '@/stores/stateSlots'
 
 export interface SaveDataV1 {
   app?: string
@@ -12,6 +13,7 @@ export interface SaveDataV1 {
   effSelectedJob: string
   values: Record<string, unknown>
   buffState?: BuffExportState
+  workspace?: CompactStateWorkspaceV1
 }
 
 /** 剝除 BOM / ```json 圍欄 / 前後雜訊後解析 JSON */

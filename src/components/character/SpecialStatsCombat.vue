@@ -13,7 +13,10 @@ import StatInput from './shared/StatInput.vue'
           >傷害<span class="buff-info dmg-bug-info">
             <button type="button" class="buff-info-trigger" aria-label="傷害欄位說明"></button>
             <span class="buff-info-tooltip" role="tooltip">
-              [技能]傷害目前有不計入貴族傳授的Bug，如1人情形須將「[技能.消耗]傷害」欄位+2
+              <span class="buff-info-lines">
+                <span class="buff-info-line">貴族傳授目前有不計入[技能]傷害的Bug</span>
+                <span class="buff-info-line">如有使用，1人情形需將[技能.消耗]傷害+2</span>
+              </span>
             </span> </span
         ></span>
         <StatInput id="dmg" restrict />

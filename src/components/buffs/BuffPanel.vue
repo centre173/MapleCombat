@@ -79,13 +79,40 @@ function positionBuffInfo(event: Event) {
   if (!isCompact) return
 
   const anchor = event.currentTarget as HTMLElement
+  const trigger = anchor.querySelector<HTMLElement>('.buff-info-trigger') ?? anchor
+  const tooltipWidth = Math.min(300, window.innerWidth - 24)
+  const viewportPadding = 12
+  const gap = 8
+
+  if (props.embedded) {
+    const triggerRect = trigger.getBoundingClientRect()
+    const overlayRect =
+      anchor.closest<HTMLElement>('.buff-overlay')?.getBoundingClientRect() ??
+      new DOMRect(0, 0, window.innerWidth, window.innerHeight)
+    const boundaryRight = overlayRect.right - viewportPadding
+    const availableRight = boundaryRight - triggerRect.right - gap
+    const boundedTooltipWidth = Math.min(tooltipWidth, Math.max(180, availableRight))
+    const availableHeight = Math.max(120, overlayRect.bottom - overlayRect.top - viewportPadding * 2)
+
+    buffInfoStyle.value = {
+      position: 'absolute',
+      left: `calc(100% + ${gap}px)`,
+      right: 'auto',
+      top: '50%',
+      bottom: 'auto',
+      transform: 'translateY(-50%)',
+      width: `${boundedTooltipWidth}px`,
+      maxWidth: `${Math.max(180, availableRight)}px`,
+      maxHeight: `${Math.min(340, availableHeight)}px`,
+    }
+    return
+  }
+
   const container =
     anchor.closest<HTMLElement>('.buff-section-title') || anchor.closest<HTMLElement>('.buff-head')
   if (!container) return
 
   const rect = container.getBoundingClientRect()
-  const viewportPadding = 12
-  const gap = 8
   const belowTop = rect.bottom + gap
   const belowSpace = window.innerHeight - belowTop - viewportPadding
   const aboveSpace = rect.top - gap - viewportPadding
@@ -184,7 +211,7 @@ const soulOrbStatOptions = computed(() =>
       </div>
     </div>
 
-    <div v-show="bodyVisible" class="buff-section buff-section--soul-orb">
+    <div v-if="!embedded" v-show="bodyVisible" class="buff-section buff-section--soul-orb">
       <div class="buff-section-title">靈魂寶珠</div>
       <div class="buff-soul-orb-control">
         <input
