@@ -91,7 +91,8 @@ jobs:
             ## 更新內容 
 
             * 新增「多狀態加權計算」功能，可輸入不同狀態占比計算平均效益，方便綜合估算爆發、常駐等情境
+            
           files: |
-          src-tauri/target/release/MapleCombat-${{ steps.ver.outputs.version }}.exe
-          src-tauri/target/release/MapleCombat-${{ steps.ver.outputs.version }}-setup-x64.exe
+            src-tauri/target/release/MapleCombat-${{ steps.ver.outputs.version }}.exe
+            src-tauri/target/release/MapleCombat-${{ steps.ver.outputs.version }}-setup-x64.exe
             
