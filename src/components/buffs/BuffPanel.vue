@@ -3,7 +3,6 @@
 import { computed, ref, type CSSProperties } from 'vue'
 import { useBuffsStore } from '@/stores/buffs'
 import { useUiStore } from '@/stores/ui'
-import { isCompactDensity } from '@/composables/useDensity'
 import { SOUL_ORB_STATS } from '@/core/buffs/delta'
 import type { BuffCategory, BuffDefinition } from '@/core/buffs/parse'
 import BuffItem from './BuffItem.vue'
@@ -20,8 +19,6 @@ const props = withDefaults(
 const buffs = useBuffsStore()
 const ui = useUiStore()
 
-const isCompact = isCompactDensity()
-
 interface BuffSection {
   key: string
   title: string
@@ -36,11 +33,9 @@ const visibleSections = computed<BuffSection[]>(() => {
   buffs.table.categories.forEach((category) => {
     let list =
       props.mode === 'eff' ? category.buffs.filter((buff) => buff.hasActive) : category.buffs
-    if (isCompact) {
-      list = [...list].sort(
-        (left, right) => (left.type === 'level' ? 0 : 1) - (right.type === 'level' ? 0 : 1),
-      )
-    }
+    list = [...list].sort(
+      (left, right) => (left.type === 'level' ? 0 : 1) - (right.type === 'level' ? 0 : 1),
+    )
 
     const regular = list.filter((buff) => !buff.nonPermanent)
     const nonPermanent = list.filter((buff) => buff.nonPermanent)
@@ -69,15 +64,13 @@ const selectedCount = computed(() =>
     0,
   ),
 )
-const bodyVisible = computed(() => props.embedded || !isCompact || ui.buffPanelOpen)
+const bodyVisible = computed(() => props.embedded || ui.buffPanelOpen)
 const panelId = computed(
   () => props.panelId || (props.mode === 'combat' ? 'buffPanelCombat' : 'buffPanelEff'),
 )
 const buffInfoStyle = ref<CSSProperties>({})
 
 function positionBuffInfo(event: Event) {
-  if (!isCompact) return
-
   const anchor = event.currentTarget as HTMLElement
   const trigger = anchor.querySelector<HTMLElement>('.buff-info-trigger') ?? anchor
   const tooltipWidth = Math.min(300, window.innerWidth - 24)
@@ -156,9 +149,9 @@ const soulOrbStatOptions = computed(() =>
         </button>
         <button type="button" class="buff-master-btn" @click="buffs.clearAll">全部清除</button>
       </span>
-      <span v-if="isCompact && !embedded" class="buff-head-count">已選 {{ selectedCount }}</span>
+      <span v-if="!embedded" class="buff-head-count">已選 {{ selectedCount }}</span>
       <button
-        v-if="isCompact && !embedded"
+        v-if="!embedded"
         type="button"
         class="buff-collapse-toggle"
         :aria-expanded="ui.buffPanelOpen"

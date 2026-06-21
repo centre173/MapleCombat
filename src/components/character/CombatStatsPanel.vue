@@ -6,14 +6,11 @@ import StatInput from './shared/StatInput.vue'
 import FamFinalSourcesControl from './shared/FamFinalSourcesControl.vue'
 import CustomSelect from './shared/CustomSelect.vue'
 import CoefficientCombobox from './shared/CoefficientCombobox.vue'
-import BuffGainSummary from './BuffGainSummary.vue'
 import SpecialStatsCombat from './SpecialStatsCombat.vue'
 import BuffPanel from '@/components/buffs/BuffPanel.vue'
-import { isCompactDensity } from '@/composables/useDensity'
 import guideImage from '@/assets/images/數值輸入說明.png'
 
 const store = useCharacterStore()
-const isCompact = isCompactDensity()
 
 const labels = computed(() => store.statLabels)
 const job = computed(() => store.selectedJob)
@@ -49,23 +46,10 @@ const ruinFinalOptions = [
       <!-- 表格1：主要能力值（緊湊版：標題列改為資料切換/職業列，由父層 head slot 傳入） -->
       <div class="section stat-table-card">
         <slot name="head" />
-        <div v-if="!isCompact" class="section-title-row">
-          <span class="section-title">主要能力值</span>
-          <span class="buff-info main-stat-guide">
-            <button
-              type="button"
-              class="buff-info-trigger"
-              aria-label="主要能力值輸入指南"
-            ></button>
-            <span class="buff-info-tooltip main-stat-guide-tooltip" role="tooltip">
-              <img class="main-stat-guide-image" :src="guideImage" alt="主要能力值輸入指南" />
-            </span>
-          </span>
-        </div>
         <div class="stat-table stat-table--main">
           <div class="st-row st-row--head">
             <span class="st-rowhead compact-main-stat-guide-cell">
-              <span v-if="isCompact" class="buff-info main-stat-guide compact-main-stat-guide">
+              <span class="buff-info main-stat-guide compact-main-stat-guide">
                 <button
                   type="button"
                   class="buff-info-trigger"
@@ -172,12 +156,6 @@ const ruinFinalOptions = [
             </div>
           </div>
         </div>
-        <SpecialStatsCombat v-if="isCompact" />
-      </div>
-
-      <!-- 表格2：特殊能力值（網頁版獨立卡片；緊湊版已併入主要能力值卡內） -->
-      <div v-if="!isCompact" class="section stat-table-card">
-        <span class="section-title">特殊能力值</span>
         <SpecialStatsCombat />
       </div>
 
@@ -325,7 +303,6 @@ const ruinFinalOptions = [
     </div>
 
     <div class="calc-side">
-      <BuffGainSummary v-if="!isCompact" mode="combat" />
       <BuffPanel mode="combat" />
     </div>
   </div>

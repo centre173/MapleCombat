@@ -1,8 +1,5 @@
 // 桌面緊湊版自動縮放：佈局視口以 635px 設計寬排版，
 // 視窗拉大時內容等比例放大且永遠滿版延展（不產生置中斷層、不露大片背景）。
-// 僅 compact 密度啟用；網頁版完全不受影響。
-import { isCompactDensity } from './useDensity'
-
 const BASE_WIDTH = 635
 const MAX_ZOOM = 1.5
 
@@ -14,9 +11,8 @@ function applyZoom(): void {
   document.body.style.minHeight = `${Math.floor(window.innerHeight / zoom)}px`
 }
 
-/** main.ts 於 mount 前呼叫一次；compact 時掛 resize 監聽。 */
+/** main.ts 於 mount 前呼叫一次，並掛 resize 監聽。 */
 export function setupAutoZoom(): void {
-  if (!isCompactDensity()) return
   applyZoom()
   window.addEventListener('resize', applyZoom, { passive: true })
 }

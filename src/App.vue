@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { useUiStore } from '@/stores/ui'
-import { isCompactDensity } from '@/composables/useDensity'
-import AppHeader from '@/components/layout/AppHeader.vue'
 import CompactToolbar from '@/components/layout/CompactToolbar.vue'
 import CharacterInputView from '@/components/character/CharacterInputView.vue'
 import EquipmentChangeView from '@/components/equipment/EquipmentChangeView.vue'
@@ -11,14 +9,12 @@ import { useStateSlotsStore } from '@/stores/stateSlots'
 
 const ui = useUiStore()
 const slots = useStateSlotsStore()
-const isCompact = isCompactDensity()
 </script>
 
 <template>
-  <CompactToolbar v-if="isCompact" />
-  <AppHeader v-else />
+  <CompactToolbar />
   <div class="container">
-    <WeightedAnalysisView v-if="isCompact && slots.isWeightedActive" :view="ui.activeView" />
+    <WeightedAnalysisView v-if="slots.isWeightedActive" :view="ui.activeView" />
     <template v-else>
       <CharacterInputView v-show="ui.activeView === 'characterInput'" />
       <EquipmentChangeView v-show="ui.activeView === 'equipmentChange'" />

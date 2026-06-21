@@ -1,6 +1,6 @@
 import { invoke, isTauri as isTauriRuntime } from '@tauri-apps/api/core'
 
-/** 是否在 Tauri 桌面環境執行（網頁版為 false） */
+/** 是否在 Tauri 桌面環境執行 */
 export function isTauri(): boolean {
   if (typeof window === 'undefined') return false
   // Tauri 2 官方判定使用 globalThis.isTauri；保留 internals 檢查相容舊 runtime。

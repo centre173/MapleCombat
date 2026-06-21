@@ -1,7 +1,6 @@
 <script setup lang="ts">
 // 實戰資料的特殊能力值（傷害/Boss/爆擊/萌獸終傷/無視與怪物防禦）。
-// 抽成元件供雙位置渲染：網頁版在獨立「特殊能力值」卡片內，
-// 桌面緊湊版併入「主要能力值」卡片下方（省一張卡的高度）。
+// 併入「主要能力值」卡片下方（省一張卡的高度）。
 import StatInput from './shared/StatInput.vue'
 import FamFinalSourcesControl from './shared/FamFinalSourcesControl.vue'
 </script>

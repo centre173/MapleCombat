@@ -1,4 +1,4 @@
-// 匯入/儲存檔案邏輯 — 自 AppHeader 抽出，供 AppHeader 與 CompactToolbar 共用。
+// 匯入/儲存檔案邏輯 — 供 CompactToolbar 使用。
 import { ref } from 'vue'
 import { useCharacterStore } from '@/stores/character'
 import { exportSaveData, parseImportedData } from '@/services/saveData'

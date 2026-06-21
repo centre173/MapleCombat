@@ -20,8 +20,9 @@ export default defineConfig(async () => ({
   // 1. prevent Vite from obscuring rust errors
   clearScreen: false,
   // 2. tauri expects a fixed port, fail if that port is not available
+  //    （release 專用 1422，與 MapleCombat-app 的 1420 分開，避免 npm run tauri dev 撞埠）
   server: {
-    port: 1420,
+    port: 1422,
     strictPort: true,
     host: host || false,
     hmr: host

@@ -1,6 +1,6 @@
 // 匯入/匯出存檔解析，格式不可更動。
 import { fieldDefs } from '@/constants/fields'
-import { isTauri, saveExportFile } from './tauri'
+import { saveExportFile } from './tauri'
 import type { BuffExportState } from '@/stores/buffs'
 import type { CompactStateWorkspaceV1 } from '@/stores/stateSlots'
 
@@ -63,24 +63,10 @@ export function normalizeSavedData(saveData: unknown): SaveDataV1 {
   }
 }
 
-/** 匯出：桌面板走 Tauri 另存對話框；網頁版下載檔案 */
+/** 匯出：透過 Tauri 另存對話框寫入檔案。 */
 export async function exportSaveData(saveData: SaveDataV1): Promise<void> {
   const contents = JSON.stringify(saveData, null, 2)
   const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
   const fileName = `combat-power-save-${timestamp}.json`
-
-  if (isTauri()) {
-    await saveExportFile(fileName, contents)
-    return
-  }
-
-  const blob = new Blob([contents], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = fileName
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
-  URL.revokeObjectURL(url)
+  await saveExportFile(fileName, contents)
 }

@@ -418,7 +418,7 @@
   margin-bottom: 0;
 }
 
-/* 網頁版維持原本 flex 子項結構；compact 版再將此群組改為固定窄欄。 */
+/* 此群組以 display:contents 攤平，compact 版再改為固定窄欄。 */
 .character-data-controls {
   display: contents;
 }

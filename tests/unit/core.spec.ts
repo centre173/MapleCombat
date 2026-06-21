@@ -208,9 +208,28 @@ describe('數值預覽公式前解析', () => {
       daPowerCoefficientRaw: '',
     })
 
-    expect(resolved.main).toEqual({ base: 95, percent: 15, noApply: 10, total: 119 })
-    expect(resolved.attack).toEqual({ base: 187, percent: 20, noApply: 5, total: 229 })
+    expect(resolved.main).toEqual({
+      base: 95,
+      percent: 15,
+      noApply: 10,
+      total: 119,
+      panel: 130, // floor(100*1.2)+10，未扣技能.消耗、未套校正
+      skillBase: 10,
+      skillPercent: 5,
+    })
+    expect(resolved.attack).toEqual({
+      base: 187,
+      percent: 20,
+      noApply: 5,
+      total: 229,
+      panel: 265, // floor(200*1.3)+5
+      skillBase: 20,
+      skillPercent: 10,
+    })
     expect(resolved.bossDamage).toBe(25)
+    // 顯示用扣除明細：value = 校正後代入值；panel = 扣前；skill = 技能.消耗
+    expect(resolved.bossDamageDetail).toEqual({ value: 25, panel: 40, skill: 5 })
+    expect(resolved.damageDetail).toEqual({ value: 0, panel: 0, skill: 0 })
   })
 
   it('實戰資料直接解析輸入與 Buff delta', () => {

@@ -37,6 +37,22 @@ export interface FormulaStatBreakdown {
   percent: number
   noApply: number
   total: number
+  /** 顯示用：遊戲面板等值（由字面輸入算出，未扣技能.消耗、未套其他校正）。不參與公式。 */
+  panel: number
+  /** 顯示用：該數值輸入的技能.消耗（基本數值）。不參與公式。 */
+  skillBase: number
+  /** 顯示用：該數值輸入的技能.消耗（%）。不參與公式。 */
+  skillPercent: number
+}
+
+/** 顯示用：傷害類（傷害/Boss/爆擊）的扣前面板值與技能.消耗。不參與公式。 */
+export interface FormulaDamageBreakdown {
+  /** 校正後代入值（= panel − skill） */
+  value: number
+  /** 遊戲面板等值（扣技能.消耗前） */
+  panel: number
+  /** 輸入的技能.消耗 */
+  skill: number
 }
 
 export interface CombatFormulaInputs {
@@ -47,10 +63,19 @@ export interface CombatFormulaInputs {
   damage: number
   bossDamage: number
   critDamage: number
+  /** 顯示用：傷害/Boss/爆擊的扣前面板值與技能.消耗。不參與公式。 */
+  damageDetail: FormulaDamageBreakdown
+  bossDamageDetail: FormulaDamageBreakdown
+  critDamageDetail: FormulaDamageBreakdown
   rawDmgSum: number
   rawCritSum: number
   finalMult: number
   equivalentMain: number
+}
+
+/** 顯示用：由字面輸入重建遊戲面板等值（與戰鬥力公式同樣 floor，但不扣技能.消耗、不套其他校正）。 */
+function panelStatValue(base: number, percent: number, noApply: number): number {
+  return Math.floor(base * (1 + percent / 100)) + noApply
 }
 
 /** 戰鬥力公式實際採用的校正後數值，同時供數值預覽顯示。 */
@@ -112,7 +137,15 @@ export function resolveCombatFormulaInputs(
     const base = getVal('baseSubtwo') + adjEventAllStat - getVal('skillBaseSubtwo') + xenonStarBonus
     const percent = getVal('percentSubtwo') - getVal('skillPercentSubtwo')
     const noApply = getVal('noApplySubtwo')
-    subtwo = { base, percent, noApply, total: Math.floor(base * (1 + percent / 100)) + noApply }
+    subtwo = {
+      base,
+      percent,
+      noApply,
+      total: Math.floor(base * (1 + percent / 100)) + noApply,
+      panel: panelStatValue(getVal('baseSubtwo'), getVal('percentSubtwo'), noApply),
+      skillBase: getVal('skillBaseSubtwo'),
+      skillPercent: getVal('skillPercentSubtwo'),
+    }
   }
 
   const attackBase =
@@ -145,18 +178,44 @@ export function resolveCombatFormulaInputs(
   const famMult = resolveFamMult(ctx.famFinalSources, getVal('famFinal'))
 
   return {
-    main: { base: mainBase, percent: mainPercent, noApply: mainNoApply, total: mainTotal },
-    sub: { base: subBase, percent: subPercent, noApply: subNoApply, total: subTotal },
+    main: {
+      base: mainBase,
+      percent: mainPercent,
+      noApply: mainNoApply,
+      total: mainTotal,
+      panel: panelStatValue(getVal('baseMain'), getVal('percentMain'), mainNoApply),
+      skillBase: getVal('skillBaseMain'),
+      skillPercent: getVal('skillPercentMain'),
+    },
+    sub: {
+      base: subBase,
+      percent: subPercent,
+      noApply: subNoApply,
+      total: subTotal,
+      panel: panelStatValue(getVal('baseSub'), getVal('percentSub'), subNoApply),
+      skillBase: getVal('skillBaseSub'),
+      skillPercent: getVal('skillPercentSub'),
+    },
     subtwo,
     attack: {
       base: attackBase,
       percent: attackPercent,
       noApply: attackNoApply,
       total: attackTotal,
+      panel: panelStatValue(getVal('atk'), getVal('percentAtk'), attackNoApply),
+      skillBase: getVal('skillAtk'),
+      skillPercent: getVal('skillPercentAtk'),
     },
     damage,
     bossDamage,
     critDamage,
+    damageDetail: { value: damage, panel: getVal('dmg'), skill: getVal('skillDmg') },
+    bossDamageDetail: {
+      value: bossDamage,
+      panel: getVal('bossDmg'),
+      skill: getVal('skillBossDmg'),
+    },
+    critDamageDetail: { value: critDamage, panel: getVal('critDmg'), skill: getVal('skillCritDmg') },
     rawDmgSum,
     rawCritSum,
     finalMult: genesisMult * famMult * ruinMult,

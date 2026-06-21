@@ -1,6 +1,5 @@
 <script setup lang="ts">
-// 桌面緊湊版：戰鬥力/實戰資料分頁列 + 職業選擇 + 資料複製，併入主要能力值卡片頂部。
-// （網頁版仍使用 CharacterInputView 內原本的 character-data-summary 區塊。）
+// 戰鬥力/實戰資料分頁列 + 職業選擇 + 資料複製，併入主要能力值卡片頂部。
 import { ref } from 'vue'
 import { useUiStore, type CalculatorMode } from '@/stores/ui'
 import { useCharacterStore } from '@/stores/character'

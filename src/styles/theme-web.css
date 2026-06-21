@@ -1,6 +1,6 @@
-/* Theme: current web-edition pastel glass skin. */
+/* Theme: pastel glass skin（粉彩玻璃配色基底；變數名 --web-* 為歷史命名）。 */
 
-/* ===== Web edition inspired pastel-glass theme ===== */
+/* ===== Pastel-glass theme ===== */
 :root {
   --web-glass: rgba(91, 96, 132, 0.6);
   --web-glass-strong: rgba(76, 82, 121, 0.64);

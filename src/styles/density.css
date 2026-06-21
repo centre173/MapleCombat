@@ -1,4 +1,4 @@
-/* 密度切換：桌面板（Tauri）用 compact 高資訊密度；網頁版 comfortable 維持原樣。
+/* 密度 Token：compact 高資訊密度。
    只覆寫間距/字級/控制元件高度，不動顏色與視覺效果。 */
 :root {
   --density-space-1: 6px;
