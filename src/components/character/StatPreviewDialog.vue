@@ -36,7 +36,7 @@ const items = computed<PreviewItem[]>(() => {
 
 function formatValue(value: number, suffix = ''): string {
   if (!Number.isFinite(value)) return '-'
-  const factor = Math.abs(value) >= 100 ? 1 : 1000
+  const factor = suffix === '%' || Math.abs(value) < 100 ? 1000 : 1
   const floored = Math.floor(value * factor) / factor
   return `${floored.toLocaleString('zh-TW')}${suffix}`
 }
