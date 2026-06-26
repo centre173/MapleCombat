@@ -378,7 +378,7 @@ describe('塔戒整場輸出增幅', () => {
 
     expect(state['skill:一擊必殺']).toBe(0)
     expect(buffTable.buffIndex['skill:一擊必殺'].nonPermanent).toBe(true)
-    expect(selectedActiveCount).toBe(34)
+    expect(selectedActiveCount).toBe(33)
   })
 
   it('賽伊蘭與收藏家靈藥使用完整數值', () => {

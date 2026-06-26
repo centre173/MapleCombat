@@ -96,6 +96,32 @@ describe('匯出/匯入 round-trip', () => {
     // v0 無 buffState：buff 維持預設，與黃金值 powerNoBuff（不含 buff）一致
     expect(store.powerNoBuff).toEqual(s.outputs.powerNoBuff)
   })
+  it('stale buff ids are ignored and missing new buffs keep current defaults', () => {
+    const s = scenarios[0]
+    const oldLevels: Record<string, number> = {
+      ...s.buffState.levels,
+      'skill:八方美人': 1,
+      'skill:公會的厲害': 1,
+      'pot:公會更大的祝福': 1,
+    }
+    delete oldLevels['skill:公會的訣竅']
+    delete oldLevels['pot:榮譽靈藥']
+
+    const store = useCharacterStore()
+    expect(() =>
+      store.applySaveData({
+        ...toSaveData(s),
+        buffState: { ...s.buffState, levels: oldLevels },
+      }),
+    ).not.toThrow()
+
+    const importedLevels = useBuffsStore().collectState().levels
+    expect(importedLevels['skill:八方美人']).toBeUndefined()
+    expect(importedLevels['skill:公會的厲害']).toBeUndefined()
+    expect(importedLevels['pot:公會更大的祝福']).toBeUndefined()
+    expect(importedLevels['skill:公會的訣竅']).toBe(1)
+    expect(importedLevels['pot:榮譽靈藥']).toBe(1)
+  })
 })
 
 describe('parseImportedData / normalizeSavedData', () => {

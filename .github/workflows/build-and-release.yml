@@ -90,7 +90,11 @@ jobs:
 
             ## 更新內容 
 
-            * 優化「數值總覽」顯示，讓面板值、校正後數值與「技能.消耗」項目更容易對照檢查
+            * 新增「榮譽靈藥」為預設Buff
+            * 將「275等椅子」移除預設Buff
+            * 公會被動技能統一為「公會的訣竅」
+            * 移除「公會更大的祝福」Buff
+            * 修正海外傳授技能 Lv.3 數值
             
           files: |
             src-tauri/target/release/MapleCombat-${{ steps.ver.outputs.version }}.exe
